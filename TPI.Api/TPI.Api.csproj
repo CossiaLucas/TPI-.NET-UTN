@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Dominio\Dominio.csproj" />
     <ProjectReference Include="..\TPI.Data\TPI.Data.csproj" />
     <ProjectReference Include="..\TPI.Services\TPI.Services.csproj" />
