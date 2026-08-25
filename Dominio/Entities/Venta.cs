@@ -14,17 +14,13 @@ namespace Dominio.Entities
         public MetodoPago MetodoPago { get; set; }
         public DateOnly Fecha { get; set; }
         public decimal Total { get; set; }
-        public string Estado { get; set; }
-
-        public Venta(int nroVenta, Usuario user, Producto prod, MetodoPago metod, DateOnly fecha, decimal total, string estado)
+        public enum EstadoVenta
         {
-            NroVenta = nroVenta;
-            User = user;
-            Producto = prod;
-            MetodoPago = metod;
-            Fecha = fecha;
-            Total = total;
-            Estado = estado;
+            NoPagado,
+            Pagado,
+            Rechazado
         }
+
+        public Venta() { }
     }
 }

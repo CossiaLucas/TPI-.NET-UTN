@@ -8,21 +8,15 @@ namespace Dominio.Entities
 {
     public class Direccion
     {
-        public Usuario User { get; set; } //ID
-        public string Calle { get; set; } //ID
-        public string Numero { get; set; } //ID
+        public int Id { get; set; }
+        public int UsuarioId { get; set; }
+        public Usuario Usuario { get; set; }
+        public string Calle { get; set; }
+        public string Numero { get; set; }
         public int Piso { get; set; }
         public string Departamento { get; set; }
-        public string CP { get; set; }
+        public string CodigoPostal { get; set; }
 
-        public Direccion(Usuario user, string calle, string num, int piso, string depto, string cp)
-        {
-            User = user;
-            Calle = calle;
-            Numero = num;
-            Piso = piso;
-            Departamento = depto;
-            CP = cp;
-        }
+        public Direccion() { }
     }
 }

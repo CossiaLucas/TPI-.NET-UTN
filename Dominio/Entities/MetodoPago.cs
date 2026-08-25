@@ -11,10 +11,6 @@ namespace Dominio.Entities
         public int Id { get; set; }
         public string Nombre { get; set; }
 
-        public MetodoPago(int id, string nombre) //REVISAR
-        {
-            Id = id;
-            Nombre = nombre;
-        }
+        public MetodoPago() { }
     }
 }

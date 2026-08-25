@@ -11,10 +11,6 @@ namespace Dominio.Entities
         public DateOnly FechaDesde { get; set; }
         public decimal Valor { get; set; }
 
-        public Precio(DateOnly fechaDesde, decimal valor)
-        {
-            FechaDesde = fechaDesde;
-            Valor = valor;
-        }
+        public Precio() { }
     }
 }

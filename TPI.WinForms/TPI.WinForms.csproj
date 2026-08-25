@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TPI.Api\TPI.Api.csproj" />
+    <ProjectReference Include="..\TPI.Services\TPI.Services.csproj" />
   </ItemGroup>
 
 </Project>
