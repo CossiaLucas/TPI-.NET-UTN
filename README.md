@@ -8,4 +8,6 @@ El trabajo fue realizado por los integrantes del grupo:
 
 ## D-E-R del trabajo
 
-<img width="565" height="683" alt="image" src="https://github.com/user-attachments/assets/906ad81b-ec2f-4eea-82d5-71c226accd2e" />
+<img width="807" height="793" alt="TPI drawio" src="https://github.com/user-attachments/assets/752d091e-dafd-481d-9816-e5a7ef3637a6" />
+
+
