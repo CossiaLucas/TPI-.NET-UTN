@@ -1,17 +1,45 @@
+using Dominio.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using TPI.Data.Context;
+using TPI.Data.Repositories;
+using TPI.Services.Interfaces;
+using TPI.Services.Services;
+
 namespace TPI.WinForms
 {
     internal static class Program
     {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
+        public static IServiceProvider ServiceProvider { get; private set; } = null!;
+
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false)
+                .Build();
+
+            var services = new ServiceCollection();
+
+            services.AddSingleton<IConfiguration>(configuration);
+
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+            services.AddScoped<IUsuarioService, UsuarioService>();
+            services.AddScoped<IAuthService, AuthService>();
+
+            services.AddTransient<LoginForm>();
+            services.AddTransient<MainForm>();       // pantalla común / admin
+
+            ServiceProvider = services.BuildServiceProvider();
+
+            Application.Run(ServiceProvider.GetRequiredService<LoginForm>());
         }
     }
 }
