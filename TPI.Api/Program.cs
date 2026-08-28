@@ -1,5 +1,10 @@
+using Dominio.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using TPI.Api;
 using TPI.Data.Context;
+using TPI.Data.Repositories;
+using TPI.Services.Interfaces;
+using TPI.Services.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +17,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>(); //injeccion de dependencias para el repositorio de usuarios
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
 var app = builder.Build();
+
+//Para que se autogenere la base de datos si no existe
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    context.Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -23,6 +38,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.MapUsuarioEndpoints(); 
 
 app.MapControllers();
 

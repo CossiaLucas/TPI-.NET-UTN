@@ -8,6 +8,13 @@ namespace TPI.Data.Context
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
+            this.Database.EnsureCreated();
+
+        }
+
+        internal AppDbContext()
+        {
+            this.Database.EnsureCreated();
         }
 
         public DbSet<Usuario> Usuarios => Set<Usuario>();
