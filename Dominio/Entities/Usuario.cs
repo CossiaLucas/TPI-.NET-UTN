@@ -21,9 +21,9 @@ namespace Dominio.Entities
         public string? Telefono { get; set; }
         public DateOnly? FechaNacimiento { get; set; }
         public bool IsAdmin { get; set; }
+        public Carrito? Carrito { get; set; }
 
         public ICollection<Favorito> Favoritos { get; set; } = new List<Favorito>();
-        public ICollection<Carrito> Carritos { get; set; } = new List<Carrito>();
         public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
 
         public Usuario() { }

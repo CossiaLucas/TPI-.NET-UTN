@@ -8,7 +8,7 @@ namespace Dominio.Entities
 {
     public class Producto
     {
-        public int Id { get; set; } 
+        public int IdProducto { get; set; } 
         public int IdCategoria { get; set; }
         public Categoria Categoria { get; set; }
         public string Nombre { get; set; }

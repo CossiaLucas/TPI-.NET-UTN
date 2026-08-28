@@ -14,9 +14,7 @@ namespace Dominio.Entities
         public string? Piso { get; set; }
         public string? Departamento { get; set; }
         public string CodigoPostal { get; set; }
-
-        public ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();
-
+        public Usuario? Usuario { get; set; }
         public Direccion() { }
     }
 }
