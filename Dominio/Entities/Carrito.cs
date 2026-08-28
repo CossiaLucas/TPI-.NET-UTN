@@ -9,9 +9,11 @@ namespace Dominio.Entities
     public class Carrito
     {
         public int Id { get; set; }
-        public int UsuarioId { get; set; }
+        public int IdUsuario { get; set; }
         public Usuario Usuario { get; set; }
-        public List<ItemCarrito> Items { get; set; } = new();
+        public decimal Subtotal { get; set; }
+
+        public ICollection<ItemCarrito> Items { get; set; } = new List<ItemCarrito>();
 
         public Carrito () { }
     }

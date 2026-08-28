@@ -10,12 +10,11 @@ namespace Dominio.Entities
 {
     public class Favorito
     {
-        public int Id { get; set; }
-        public int UsuarioId { get; set; }
+        public int IdUsuario { get; set; }
         public Usuario Usuario { get; set; }
-        public int ProductoId { get; set; }
+        public int IdProducto { get; set; }
         public Producto Producto { get; set; }
-        public DateOnly FechaAgregado { get; set; }
+        public DateTime FechaAgregado { get; set; }
 
         public Favorito() { }
     }
