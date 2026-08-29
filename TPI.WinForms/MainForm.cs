@@ -23,15 +23,18 @@ namespace TPI.WinForms
         {
             lblBienvenida.Text = $"Hola, {SesionActual.Usuario!.Nombre}";
 
-            // Los CRUD de Producto/Categoria solo los ve un admin.
+            // Los CRUD de Producto/Categoria solo los veria un admin.
             // Si mas adelante seagrega algo para el usuario comun, va aca tambian,
             // condicionado a !SesionActual.Usuario.IsAdmin.
-           // menuProductos.Visible = SesionActual.Usuario.IsAdmin;
-           // menuCategorias.Visible = SesionActual.Usuario.IsAdmin;
+
+
+           // menuProductos.Visible = SesionActual.Usuario.IsAdmin; esta linea seria si en un futuro los menus de producto y categorias los ve solo el admin
+           // menuCategorias.Visible = SesionActual.Usuario.IsAdmin;    por ahora para la entrega 2 asumo que no
         }
 
         private void menuProductos_Click(object sender, EventArgs e)
         {
+            // ProductoListForm NO EXISTE TODAVIA, FALTA EL SERVICIO
             //var form = Program.ServiceProvider.GetRequiredService<ProductoListForm>();
             //form.ShowDialog(); // modal: vuelve aca al cerrarlo
             MessageBox.Show("Productos menu ejemplo");
@@ -39,6 +42,7 @@ namespace TPI.WinForms
 
         private void menuCategorias_Click(object sender, EventArgs e)
         {
+             // CateoriaListForm NO EXISTE TODAVIA, FALTA EL SERVICIO
             //var form = Program.ServiceProvider.GetRequiredService<CategoriaListForm>();
             //form.ShowDialog();
             MessageBox.Show("Categorías menu ejemplo");

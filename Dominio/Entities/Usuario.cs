@@ -18,10 +18,10 @@ namespace Dominio.Entities
         public string Salt { get; private set; }
 
         public string DNI { get; set; }
-        public List<Direccion> Direcciones { get; set; } = new List<Direccion>();
+        public ICollection<Direccion> Direcciones { get; set; } = new List<Direccion>();
 
-        public List<Favorito> Favorito { get; set; } = new List<Favorito>();
-        public List<Venta> Ventas { get; set; } = new List<Venta>();
+        public ICollection<Favorito> Favoritos { get; set; } = new List<Favorito>();
+        public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
 
         public Carrito? Carrito { get; set; }
         public DateTime FechaNacimiento { get; set; }

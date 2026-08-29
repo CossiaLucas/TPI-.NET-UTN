@@ -13,8 +13,8 @@ namespace Dominio.Entities
         public Usuario Usuario { get; set; }
         public string Calle { get; set; }
         public string Numero { get; set; }
-        public int Piso { get; set; }
-        public string Departamento { get; set; }
+        public int? Piso { get; set; }
+        public string? Departamento { get; set; }
         public string CodigoPostal { get; set; }
 
         public Direccion() { }
