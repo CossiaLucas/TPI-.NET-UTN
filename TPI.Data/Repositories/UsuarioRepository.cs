@@ -39,16 +39,16 @@ namespace TPI.Data.Repositories
         {
             return await _context.Usuarios
                 .AsNoTracking()
-                .Include(u => u.Direcciones)
-                .Include(u => u.Favorito)
+                .Include(u => u.Direccion)
+                .Include(u => u.Favoritos)
                 .ToListAsync();
         }
 
         public async Task<Usuario?> GetByIdAsync(int id)
         {
             return await _context.Usuarios
-                .Include(u => u.Direcciones)
-                .Include(u => u.Favorito)
+                .Include(u => u.Direccion)  
+                .Include(u => u.Favoritos)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
 

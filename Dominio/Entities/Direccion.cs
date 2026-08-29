@@ -8,8 +8,7 @@ namespace Dominio.Entities
 {
     public class Direccion
     {
-        public int Id { get; set; }
-        public int UsuarioId { get; set; }
+        public int IdDireccion { get; set; }
         public Usuario Usuario { get; set; }
         public string Calle { get; set; }
         public string Numero { get; set; }

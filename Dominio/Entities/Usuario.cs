@@ -12,13 +12,15 @@ namespace Dominio.Entities
     {
         public int Id { get; set; } 
         public string Nombre { get; set; }
+        public string Username { get; private set; }
         public string Apellido { get; set; }
         public string Email { get; set; }
         public string ClaveHash { get; set; }
         public string Salt { get; private set; }
 
         public string DNI { get; set; }
-        public ICollection<Direccion> Direcciones { get; set; } = new List<Direccion>();
+        public int? IdDireccion { get; set; }
+        public Direccion? Direccion { get; set; }
 
         public ICollection<Favorito> Favoritos { get; set; } = new List<Favorito>();
         public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
@@ -29,10 +31,11 @@ namespace Dominio.Entities
         public string Telefono { get; set; }
         public bool IsAdmin { get; set; }
 
-        public Usuario(string nombre, string apellido, string email, string password, string dni, DateTime fechaNacimiento, string telefono, bool isAdmin)
+        public Usuario(string nombre, string apellido, string username, string email, string password, string dni, DateTime fechaNacimiento, string telefono, bool isAdmin)
         {
             Nombre = nombre;
             Apellido = apellido;
+            SetUsername(username);
             SetEmail(email);
             SetPassword(password);
             DNI = dni;
@@ -49,6 +52,14 @@ namespace Dominio.Entities
             if (id < 0)
                 throw new ArgumentException("El Id debe ser mayor que 0.", nameof(id));
             Id = id;
+        }
+        public void SetUsername(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                throw new ArgumentException("El nombre de usuario no puede ser nulo o vacío.", nameof(username));
+            if (username.Length < 4 || username.Length > 50)
+                throw new ArgumentException("El nombre de usuario debe tener entre 4 y 50 caracteres.", nameof(username));
+            Username = username;
         }
 
         public void SetEmail(string email)

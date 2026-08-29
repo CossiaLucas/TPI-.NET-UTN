@@ -30,6 +30,7 @@ namespace TPI.Services.Services
             var usuario = new Usuario(
                 nombre: dto.Nombre,
                 apellido: dto.Apellido,
+                username: dto.Username,
                 email: dto.Email,
                 password: dto.Clave,
                 dni: dto.DNI,
@@ -81,6 +82,7 @@ namespace TPI.Services.Services
                 Id = usuario.Id,
                 Nombre = usuario.Nombre,
                 Apellido = usuario.Apellido,
+                Username = usuario.Username,
                 Email = usuario.Email,
                 DNI = usuario.DNI,
                 FechaNacimiento = usuario.FechaNacimiento,
