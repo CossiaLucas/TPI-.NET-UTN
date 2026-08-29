@@ -156,7 +156,7 @@ namespace TPI.Data.Context
                       .HasMaxLength(500);
 
                 entity.HasOne(e => e.Categoria)
-                      .WithMany()
+                      .WithMany(c => c.Productos)
                       .HasForeignKey(e => e.IdCategoria)
                       .OnDelete(DeleteBehavior.Restrict);
             });
