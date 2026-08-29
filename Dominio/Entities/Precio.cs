@@ -8,8 +8,10 @@ namespace Dominio.Entities
 {
     public class Precio
     {
-        public DateOnly FechaDesde { get; set; }
+        public int IdProducto { get; set; }
+        public DateTime FechaDesde { get; set; }
         public decimal Valor { get; set; }
+        public Producto Producto { get; set; } = null!;
 
         public Precio() { }
     }

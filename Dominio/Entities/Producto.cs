@@ -12,10 +12,10 @@ namespace Dominio.Entities
         public string Nombre { get; set; }
         public string Descripcion { get; set; }
         public int Stock { get; set; }
-        public int CategoriaId { get; set; }
+        public int IdCategoria { get; set; }
         public Categoria Categoria { get; set; }
         public List<Precio> HistorialPrecios { get; set; } = new();
-        public string Imagen { get; set; }
+        public string FotoUrl { get; set; }
 
         public Producto() { }
     }

@@ -15,7 +15,7 @@ namespace Dominio.Entities
         public Usuario Usuario { get; set; }
         public int ProductoId { get; set; }
         public Producto Producto { get; set; }
-        public DateOnly FechaAgregado { get; set; }
+        public DateTime FechaAgregado { get; set; }
 
         public Favorito() { }
     }
