@@ -9,10 +9,10 @@ namespace TPI.Services.Interfaces
 {
     public interface ICategoriaService
     {
-        Task<CategoriaDTO> CreateAsync(CategoriaCreateDTO dto);
+        Task<CategoriaDTO> CreateAsync(CategoriaDTO dto);
         Task<CategoriaDTO?> GetByIdAsync(int id);
-        Task<List<CategoriaDTO>> GetAllAsync();
-        Task<bool> UpdateAsync(CategoriaUpdateDTO dto);
+        Task<IEnumerable<CategoriaDTO>> GetAllAsync();
+        Task<bool> UpdateAsync(CategoriaDTO dto);
         Task<bool> DeleteAsync(int id);
     }
 }

@@ -40,7 +40,7 @@ namespace TPI.Data.Repositories
             return await _context.Usuarios
                 .AsNoTracking()
                 .Include(u => u.Direccion)
-                .Include(u => u.Favoritos)
+                .Include(u => u.Favoritos)  
                 .ToListAsync();
         }
 

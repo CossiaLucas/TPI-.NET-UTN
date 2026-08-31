@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using TPI.Services.DTOs;
 using TPI.Services.Interfaces;
 
 
@@ -7,50 +8,102 @@ namespace TPI.WinForms
     public partial class CategoriaListForm : Form
     {
         private readonly ICategoriaService _categoriaService;
+
         public CategoriaListForm(ICategoriaService categoriaService)
         {
             InitializeComponent();
             _categoriaService = categoriaService;
-            this.Load += CategoriaListForm_Load;
         }
 
-        private async void CategoriaListForm_Load(object sender, EventArgs e) => await CargarCategorias();
-
-        private async Task CargarCategorias()
+        private async void Categorias_Load(object sender, EventArgs e)
         {
+            ConfigurarGrilla();
+            await ListarAsync();
+        }
+
+        private void ConfigurarGrilla()
+        {
+            dgvCategorias.AutoGenerateColumns = false;
+            dgvCategorias.ReadOnly = true;
+            dgvCategorias.AllowUserToAddRows = false;
+            dgvCategorias.AllowUserToDeleteRows = false;
+
+            dgvCategorias.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "id",
+                HeaderText = "ID",
+                DataPropertyName = nameof(CategoriaDTO.Id)
+            });
+            dgvCategorias.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "nombre",
+                HeaderText = "Nombre",
+                DataPropertyName = nameof(CategoriaDTO.Nombre)
+            });
+
+        }
+
+        private async Task ListarAsync()
+        {
+            var categorias = await _categoriaService.GetAllAsync();
+            dgvCategorias.DataSource = categorias;
+        }
+
+        private async void btnActualizar_Click(object sender, EventArgs e)
+        {
+            await ListarAsync();
+        }
+
+        private void btnSalir_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void tsbNuevo_Click(object sender, EventArgs e)
+        {
+            var form = Program.ServiceProvider.GetRequiredService<CategoriaDetalleForm>();
+            form.Inicializar(null);
+            if (form.ShowDialog() == DialogResult.OK)
+                _ = ListarAsync();
+        }
+
+        private void tsbEditar_Click(object sender, EventArgs e)
+        {
+            if (dgvCategorias.CurrentRow?.DataBoundItem is not CategoriaDTO seleccionada)
+            {
+                MessageBox.Show("Seleccioná una categoría de la grilla.");
+                return;
+            }
+
+            var form = Program.ServiceProvider.GetRequiredService<CategoriaDetalleForm>();
+            form.Inicializar(seleccionada);
+            if (form.ShowDialog() == DialogResult.OK)
+                _ = ListarAsync();
+        }
+
+        private async void tsbEliminar_Click(object sender, EventArgs e)
+        {
+            if (dgvCategorias.CurrentRow?.DataBoundItem is not CategoriaDTO seleccionada)
+            {
+                MessageBox.Show("Seleccioná una categoría de la grilla.");
+                return;
+            }
+
+            if (MessageBox.Show($"¿Eliminar la categoría '{seleccionada.Nombre}'?", "Confirmar",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                return;
+
             try
             {
-                var categorias = await _categoriaService.GetAllAsync();
-                dgvCategorias.DataSource = categorias.Select(c => new { c.Id, c.Nombre }).ToList();
-                lblMensaje.Text = $"Se cargaron {categorias.Count} categorías";
+                await _categoriaService.DeleteAsync(seleccionada.Id);
+                await ListarAsync();
             }
-            catch (Exception ex) { lblMensaje.Text = $"Error: {ex.Message}"; }
-        }
-
-        private void btnCrear_Click(object sender, EventArgs e)
-        {
-            var form = Program.ServiceProvider.GetRequiredService<CategoriaForm>();
-            if (form.ShowDialog() == DialogResult.OK) CargarCategorias().GetAwaiter().GetResult();
-        }
-
-        private void btnEditar_Click(object sender, EventArgs e)
-        {
-            if (dgvCategorias.SelectedRows.Count == 0) { lblMensaje.Text = "Seleccione una categoría"; return; }
-            var id = Convert.ToInt32(dgvCategorias.SelectedRows[0].Cells["Id"].Value);
-            var form = Program.ServiceProvider.GetRequiredService<CategoriaForm>();
-            form.CargarPara(id);
-            if (form.ShowDialog() == DialogResult.OK) CargarCategorias().GetAwaiter().GetResult();
-        }
-
-        private async void btnEliminar_Click(object sender, EventArgs e)
-        {
-            if (dgvCategorias.SelectedRows.Count == 0) { lblMensaje.Text = "Seleccione una categoría"; return; }
-            var id = Convert.ToInt32(dgvCategorias.SelectedRows[0].Cells["Id"].Value);
-            if (MessageBox.Show($"¿Eliminar?", "Confirm", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            catch (Exception ex)
             {
-                await _categoriaService.DeleteAsync(id);
-                await CargarCategorias();
+                MessageBox.Show($"No se pudo eliminar: {ex.Message}");
             }
         }
+
+      
     }
 }

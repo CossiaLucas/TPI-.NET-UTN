@@ -35,17 +35,16 @@ namespace TPI.WinForms
         private void menuProductos_Click(object sender, EventArgs e)
         {
             // ProductoListForm NO EXISTE TODAVIA, FALTA EL SERVICIO
-            //var form = Program.ServiceProvider.GetRequiredService<ProductoListForm>();
-            //form.ShowDialog(); // modal: vuelve aca al cerrarlo
-            MessageBox.Show("Productos menu ejemplo");
+            var form = Program.ServiceProvider.GetRequiredService<ProductoListForm>();
+            form.ShowDialog(); // modal: vuelve aca al cerrarlo
         }
 
         private void menuCategorias_Click(object sender, EventArgs e)
         {
              // CateoriaListForm NO EXISTE TODAVIA, FALTA EL SERVICIO
-            //var form = Program.ServiceProvider.GetRequiredService<CategoriaListForm>();
-            //form.ShowDialog();
-            MessageBox.Show("Categorías menu ejemplo");
+            var form = Program.ServiceProvider.GetRequiredService<CategoriaListForm>();
+            form.ShowDialog();
+            //MessageBox.Show("Categorías menu ejemplo");
         }
 
         private void menuLogout_Click(object sender, EventArgs e)

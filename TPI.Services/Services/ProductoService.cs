@@ -14,11 +14,12 @@ namespace TPI.Services.Services
             _productoRepository = productoRepository;
             _categoriaRepository = categoriaRepository;
         }
-        public async Task<ProductoDTO> CreateAsync(ProductoCreateDTO dto)
+        public async Task<ProductoDTO> CreateAsync(ProductoDTO dto)
         {
             var categoria = await _categoriaRepository.GetByIdAsync(dto.IdCategoria);
             if (categoria is null)
                 throw new InvalidOperationException("Categoria no encontrada.");
+
             var prod = new Producto
                 {
                 Nombre = dto.Nombre,
@@ -34,7 +35,7 @@ namespace TPI.Services.Services
         {
             return await _productoRepository.DeleteAsync(id);
         }
-        public async Task<List<ProductoDTO>> GetAllAsync()
+        public async Task<IEnumerable<ProductoDTO>> GetAllAsync()
         {
             var items = await _productoRepository.GetAllAsync();
             return items.Select(ToDto).ToList();
@@ -44,7 +45,7 @@ namespace TPI.Services.Services
             var entidad = await _productoRepository.GetByIdAsync(id);
             return entidad is null ? null : ToDto(entidad);
         }
-        public async Task<bool> UpdateAsync(ProductoUpdateDTO dto)
+        public async Task<bool> UpdateAsync(ProductoDTO dto)
         {
             var entidad = await _productoRepository.GetByIdAsync(dto.Id);
             if (entidad is null)
@@ -68,7 +69,7 @@ namespace TPI.Services.Services
                 Descripcion = p.Descripcion,
                 Stock = p.Stock,
                 IdCategoria = p.IdCategoria,
-                CategoriaNombre = p.Categoria?.Nombre ?? string.Empty,
+                NombreCategoria = p.Categoria?.Nombre ?? string.Empty,
                 FotoUrl = p.FotoUrl
             };
         }

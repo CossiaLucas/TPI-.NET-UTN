@@ -13,8 +13,8 @@ namespace TPI.Api
             })
             .WithName("GetCategoria").Produces<CategoriaDTO>(StatusCodes.Status200OK).Produces(StatusCodes.Status404NotFound);
             app.MapGet("/categorias", async (ICategoriaService service) => Results.Ok(await service.GetAllAsync()))
-                .WithName("GetAllCategorias").Produces<List<CategoriaDTO>>(StatusCodes.Status200OK);
-            app.MapPost("/categorias", async (CategoriaCreateDTO dto, ICategoriaService service) =>
+                .WithName("GetAllCategorias").Produces<IEnumerable<CategoriaDTO>>(StatusCodes.Status200OK);
+            app.MapPost("/categorias", async (CategoriaDTO dto, ICategoriaService service) =>
             {
                 try
                 {
@@ -27,7 +27,7 @@ namespace TPI.Api
                 }
             })
             .WithName("AddCategoria").Produces<CategoriaDTO>(StatusCodes.Status201Created).Produces(StatusCodes.Status400BadRequest);
-            app.MapPut("/categorias", async (CategoriaUpdateDTO dto, ICategoriaService service) =>
+            app.MapPut("/categorias", async (CategoriaDTO dto, ICategoriaService service) =>
             {
                 try
                 {

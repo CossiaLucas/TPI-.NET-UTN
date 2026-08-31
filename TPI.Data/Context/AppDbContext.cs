@@ -83,9 +83,13 @@ namespace TPI.Data.Context
                 entity.HasIndex(e => e.Username)
                     .IsUnique();
 
-                entity.Property(e => e.Clave)
+                entity.Property(e => e.ClaveHash)
                     .HasMaxLength(255)
                     .IsRequired();
+
+                entity.Property(e => e.Salt)
+                      .HasMaxLength(255)
+                      .IsRequired();
 
                 entity.Property(e => e.Email)
                     .HasMaxLength(150)
@@ -94,11 +98,11 @@ namespace TPI.Data.Context
                 entity.HasIndex(e => e.Email)
                     .IsUnique();
 
-                entity.Property(e => e.Dni)
+                entity.Property(e => e.DNI)
                     .HasMaxLength(20)
                     .IsRequired();
 
-                entity.HasIndex(e => e.Dni)
+                entity.HasIndex(e => e.DNI)
                     .IsUnique();
 
                 entity.Property(e => e.FechaAlta)
@@ -127,7 +131,7 @@ namespace TPI.Data.Context
             {
                 entity.ToTable("categoria");
 
-                entity.HasKey(e => e.IdCategoria);
+                entity.HasKey(e => e.Id);
 
                 entity.Property(e => e.Nombre)
                     .HasMaxLength(100)
@@ -144,7 +148,7 @@ namespace TPI.Data.Context
             {
                 entity.ToTable("producto");
 
-                entity.HasKey(e => e.IdProducto);
+                entity.HasKey(e => e.Id);
 
                 entity.Property(e => e.Nombre)
                     .HasMaxLength(150)

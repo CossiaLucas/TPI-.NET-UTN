@@ -1,6 +1,6 @@
 ﻿namespace TPI.WinForms
 {
-    partial class CategoriaListForm
+    partial class ProductoListForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,10 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CategoriaListForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProductoListForm));
             tcCategorias = new ToolStripContainer();
             tlCategorias = new TableLayoutPanel();
-            dgvCategorias = new DataGridView();
+            dgvProductos = new DataGridView();
             btnActualizar = new Button();
             btnSalir = new Button();
             tsCategorias = new ToolStrip();
@@ -42,7 +42,7 @@
             tcCategorias.TopToolStripPanel.SuspendLayout();
             tcCategorias.SuspendLayout();
             tlCategorias.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvCategorias).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvProductos).BeginInit();
             tsCategorias.SuspendLayout();
             SuspendLayout();
             // 
@@ -57,7 +57,7 @@
             tcCategorias.Location = new Point(0, 0);
             tcCategorias.Name = "tcCategorias";
             tcCategorias.Size = new Size(800, 450);
-            tcCategorias.TabIndex = 0;
+            tcCategorias.TabIndex = 1;
             tcCategorias.Text = "toolStripContainer1";
             // 
             // tcCategorias.TopToolStripPanel
@@ -69,7 +69,7 @@
             tlCategorias.ColumnCount = 2;
             tlCategorias.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tlCategorias.ColumnStyles.Add(new ColumnStyle());
-            tlCategorias.Controls.Add(dgvCategorias, 0, 0);
+            tlCategorias.Controls.Add(dgvProductos, 0, 0);
             tlCategorias.Controls.Add(btnActualizar, 0, 1);
             tlCategorias.Controls.Add(btnSalir, 1, 1);
             tlCategorias.Dock = DockStyle.Fill;
@@ -81,15 +81,15 @@
             tlCategorias.Size = new Size(800, 425);
             tlCategorias.TabIndex = 0;
             // 
-            // dgvCategorias
+            // dgvProductos
             // 
-            dgvCategorias.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            tlCategorias.SetColumnSpan(dgvCategorias, 2);
-            dgvCategorias.Dock = DockStyle.Fill;
-            dgvCategorias.Location = new Point(3, 3);
-            dgvCategorias.Name = "dgvCategorias";
-            dgvCategorias.Size = new Size(794, 390);
-            dgvCategorias.TabIndex = 0;
+            dgvProductos.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            tlCategorias.SetColumnSpan(dgvProductos, 2);
+            dgvProductos.Dock = DockStyle.Fill;
+            dgvProductos.Location = new Point(3, 3);
+            dgvProductos.Name = "dgvProductos";
+            dgvProductos.Size = new Size(794, 390);
+            dgvProductos.TabIndex = 0;
             // 
             // btnActualizar
             // 
@@ -118,7 +118,7 @@
             tsCategorias.Items.AddRange(new ToolStripItem[] { tsbNuevo, tsbEditar, tsbEliminar });
             tsCategorias.Location = new Point(4, 0);
             tsCategorias.Name = "tsCategorias";
-            tsCategorias.Size = new Size(81, 25);
+            tsCategorias.Size = new Size(112, 25);
             tsCategorias.TabIndex = 0;
             // 
             // tsbNuevo
@@ -151,22 +151,22 @@
             tsbEliminar.Text = "Eliminar";
             tsbEliminar.Click += tsbEliminar_Click;
             // 
-            // CategoriaListForm
+            // ProductoListForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Controls.Add(tcCategorias);
-            Name = "CategoriaListForm";
-            Text = "CategoriaListForm";
-            Load += Categorias_Load;
+            Name = "ProductoListForm";
+            Text = "Lista de Productos";
+            Load += ProductoListForm_Load;
             tcCategorias.ContentPanel.ResumeLayout(false);
             tcCategorias.TopToolStripPanel.ResumeLayout(false);
             tcCategorias.TopToolStripPanel.PerformLayout();
             tcCategorias.ResumeLayout(false);
             tcCategorias.PerformLayout();
             tlCategorias.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)dgvCategorias).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvProductos).EndInit();
             tsCategorias.ResumeLayout(false);
             tsCategorias.PerformLayout();
             ResumeLayout(false);
@@ -176,12 +176,12 @@
 
         private ToolStripContainer tcCategorias;
         private TableLayoutPanel tlCategorias;
-        private DataGridView dgvCategorias;
+        private DataGridView dgvProductos;
+        private Button btnActualizar;
+        private Button btnSalir;
         private ToolStrip tsCategorias;
         private ToolStripButton tsbNuevo;
         private ToolStripButton tsbEditar;
         private ToolStripButton tsbEliminar;
-        private Button btnActualizar;
-        private Button btnSalir;
     }
 }

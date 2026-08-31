@@ -32,8 +32,6 @@ namespace TPI.WinForms
             services.AddScoped<IUsuarioService, UsuarioService>();
 
             services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IUsuarioService, UsuarioService>();
-            services.AddScoped<IAuthService, AuthService>();
 
             services.AddScoped<ICategoriaRepository, CategoriaRepository>();
             services.AddScoped<ICategoriaService, CategoriaService>();
@@ -45,18 +43,19 @@ namespace TPI.WinForms
             services.AddTransient<MainForm>();       // pantalla comun / admin
 
             services.AddTransient<CategoriaListForm>();
-            //services.AddTransient<CategoriaForm>();
-            //services.AddTransient<ProductoListForm>();
-            //services.AddTransient<ProductoForm>();
+            services.AddTransient<CategoriaDetalleForm>();
+            services.AddTransient<ProductoListForm>();
+            services.AddTransient<ProductoDetalleForm>();
             ServiceProvider = services.BuildServiceProvider();
 
-            // Asegurar migraciones y seed local cuando se ejecuta el WinForms
+            // uso EnsureCreated() en lugar de migraciones para mejor usabilidad en desarrollo. Si quisiera asegurar migraciones y seed local cuando se ejecuta el WinForms, uso Migrate().
             using (var scope = ServiceProvider.CreateScope())
             {
                 try
                 {
                     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                    context.Database.Migrate();
+                    //context.Database.Migrate()  saco uso de migraciones por ahora para ahorrar errores.
+                    context.Database.EnsureCreated();
                     var usuarioRepo = scope.ServiceProvider.GetRequiredService<IUsuarioRepository>();
                     var categoriaRepo = scope.ServiceProvider.GetService<ICategoriaRepository>();
                     var productoRepo = scope.ServiceProvider.GetService<IProductoRepository>();
@@ -68,7 +67,7 @@ namespace TPI.WinForms
                             apellido: "Capo",
                             username: "admin",
                             email: "admin@gmail.com",
-                            password: "1234",
+                            password: "1234567",
                             dni: "12345678",
                             fechaNacimiento: DateTime.Now,
                             telefono: "000000000",

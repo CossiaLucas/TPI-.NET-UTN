@@ -12,13 +12,12 @@ namespace Dominio.Entities
 
         public string Username { get; private set; } = string.Empty;
 
-        public string Clave { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public string Dni { get; set; } = string.Empty;
+        public string DNI { get; set; } = string.Empty;
 
         public DateTime FechaAlta { get; set; }
         public string? Telefono { get; set; }
-        public DateOnly? FechaNacimiento { get; set; }
+        public DateTime FechaNacimiento { get; set; }
 
         public string ClaveHash { get; set; } = string.Empty;
         public string Salt { get; private set; } = string.Empty;
@@ -50,9 +49,9 @@ namespace Dominio.Entities
             SetEmail(email);
             SetPassword(password);
 
-            Dni = dni;
+            DNI = dni;
 
-            FechaNacimiento = DateOnly.FromDateTime(fechaNacimiento);
+            FechaNacimiento = fechaNacimiento;
 
             Telefono = telefono;
             IsAdmin = isAdmin;

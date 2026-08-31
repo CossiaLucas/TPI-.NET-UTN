@@ -84,12 +84,9 @@ namespace TPI.Services.Services
                 Apellido = usuario.Apellido,
                 Username = usuario.Username,
                 Email = usuario.Email,
-                DNI = usuario.Dni,
+                DNI = usuario.DNI,
 
-                FechaNacimiento = usuario.FechaNacimiento.HasValue
-                    ? usuario.FechaNacimiento.Value.ToDateTime(TimeOnly.MinValue)
-                    : default,
-
+                FechaNacimiento = usuario.FechaNacimiento,
                 FechaAlta = usuario.FechaAlta,
                 Telefono = usuario.Telefono ?? string.Empty,
                 IsAdmin = usuario.IsAdmin
