@@ -29,4 +29,15 @@
     <ProjectReference Include="..\Dominio\Dominio.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Guia Local DB.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Guia Local DB.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
 </Project>

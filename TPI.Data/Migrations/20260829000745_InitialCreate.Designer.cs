@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TPI.Data.Context;
 
@@ -11,9 +12,11 @@ using TPI.Data.Context;
 namespace TPI.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260829000745_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,15 +45,6 @@ namespace TPI.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("carrito", (string)null);
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UsuarioId")
-                        .IsUnique();
-
-                    b.ToTable("Carrito");
                 });
 
             modelBuilder.Entity("Dominio.Entities.Categoria", b =>
@@ -136,9 +130,6 @@ namespace TPI.Data.Migrations
                     b.Property<string>("Piso")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
-                    b.Property<int?>("Piso")
-                        .HasMaxLength(20)
-                        .HasColumnType("int");
 
                     b.HasKey("IdDireccion");
 
@@ -161,28 +152,6 @@ namespace TPI.Data.Migrations
                     b.HasIndex("IdProducto");
 
                     b.ToTable("favoritos", (string)null);
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("FechaAgregado")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ProductoId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductoId");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("Favorito");
                 });
 
             modelBuilder.Entity("Dominio.Entities.ItemCarrito", b =>
@@ -213,22 +182,6 @@ namespace TPI.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("itemCarrito", (string)null);
-                    b.Property<int>("CarritoId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductoId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Subtotal")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CarritoId");
-
-                    b.HasIndex("ProductoId");
-
-                    b.ToTable("ItemCarrito");
                 });
 
             modelBuilder.Entity("Dominio.Entities.MetodoPago", b =>
@@ -250,11 +203,6 @@ namespace TPI.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("metodoPago", (string)null);
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MetodoPago");
                 });
 
             modelBuilder.Entity("Dominio.Entities.Precio", b =>
@@ -281,18 +229,12 @@ namespace TPI.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdProducto"));
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("FotoUrl")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -308,7 +250,6 @@ namespace TPI.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("IdProducto");
-                    b.HasKey("Id");
 
                     b.HasIndex("IdCategoria");
 
@@ -329,13 +270,11 @@ namespace TPI.Data.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Clave")
-                    b.Property<string>("ClaveHash")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Dni")
-                    b.Property<string>("DNI")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
@@ -352,10 +291,6 @@ namespace TPI.Data.Migrations
                         .HasColumnType("date");
 
                     b.Property<int>("IdDireccion")
-                    b.Property<DateTime>("FechaNacimiento")
-                        .HasColumnType("date");
-
-                    b.Property<int?>("IdDireccion")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsAdmin")
@@ -369,13 +304,6 @@ namespace TPI.Data.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Telefono")
-                    b.Property<string>("Salt")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Telefono")
-                        .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
@@ -387,7 +315,6 @@ namespace TPI.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Dni")
-                    b.HasIndex("DNI")
                         .IsUnique();
 
                     b.HasIndex("Email")
@@ -395,8 +322,6 @@ namespace TPI.Data.Migrations
 
                     b.HasIndex("IdDireccion")
                         .IsUnique();
-                        .IsUnique()
-                        .HasFilter("[IdDireccion] IS NOT NULL");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -433,39 +358,6 @@ namespace TPI.Data.Migrations
                     b.HasIndex("IdUsuario");
 
                     b.ToTable("venta", (string)null);
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateOnly>("Fecha")
-                        .HasColumnType("date");
-
-                    b.Property<int>("MetodoPagoId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("NroVenta")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductoId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MetodoPagoId");
-
-                    b.HasIndex("ProductoId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Venta");
                 });
 
             modelBuilder.Entity("Dominio.Entities.Carrito", b =>
@@ -473,7 +365,6 @@ namespace TPI.Data.Migrations
                     b.HasOne("Dominio.Entities.Usuario", "Usuario")
                         .WithOne("Carrito")
                         .HasForeignKey("Dominio.Entities.Carrito", "IdUsuario")
-                        .HasForeignKey("Dominio.Entities.Carrito", "UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -504,18 +395,12 @@ namespace TPI.Data.Migrations
                     b.HasOne("Dominio.Entities.Producto", "Producto")
                         .WithMany("Favoritos")
                         .HasForeignKey("IdProducto")
-            modelBuilder.Entity("Dominio.Entities.Favorito", b =>
-                {
-                    b.HasOne("Dominio.Entities.Producto", "Producto")
-                        .WithMany()
-                        .HasForeignKey("ProductoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Dominio.Entities.Usuario", "Usuario")
                         .WithMany("Favoritos")
                         .HasForeignKey("IdUsuario")
-                        .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -529,7 +414,6 @@ namespace TPI.Data.Migrations
                     b.HasOne("Dominio.Entities.Carrito", "Carrito")
                         .WithMany("Items")
                         .HasForeignKey("IdCarrito")
-                        .HasForeignKey("CarritoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -537,9 +421,6 @@ namespace TPI.Data.Migrations
                         .WithMany("ItemsCarrito")
                         .HasForeignKey("IdProducto")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .WithMany()
-                        .HasForeignKey("ProductoId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Carrito");
@@ -551,7 +432,6 @@ namespace TPI.Data.Migrations
                 {
                     b.HasOne("Dominio.Entities.Producto", "Producto")
                         .WithMany("Precios")
-                        .WithMany("HistorialPrecios")
                         .HasForeignKey("IdProducto")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -577,7 +457,6 @@ namespace TPI.Data.Migrations
                         .HasForeignKey("Dominio.Entities.Usuario", "IdDireccion")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Direccion");
                 });
@@ -594,28 +473,11 @@ namespace TPI.Data.Migrations
                         .WithMany("Ventas")
                         .HasForeignKey("IdUsuario")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasForeignKey("MetodoPagoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Dominio.Entities.Producto", "Producto")
-                        .WithMany()
-                        .HasForeignKey("ProductoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Dominio.Entities.Usuario", "User")
-                        .WithMany("Ventas")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("MetodoPago");
 
                     b.Navigation("Usuario");
-                    b.Navigation("Producto");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Dominio.Entities.Carrito", b =>
@@ -631,8 +493,6 @@ namespace TPI.Data.Migrations
             modelBuilder.Entity("Dominio.Entities.Direccion", b =>
                 {
                     b.Navigation("Usuario");
-                    b.Navigation("Usuario")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Dominio.Entities.Producto", b =>
@@ -644,7 +504,6 @@ namespace TPI.Data.Migrations
                     b.Navigation("ItemsCarrito");
 
                     b.Navigation("Precios");
-                    b.Navigation("HistorialPrecios");
                 });
 
             modelBuilder.Entity("Dominio.Entities.Usuario", b =>
