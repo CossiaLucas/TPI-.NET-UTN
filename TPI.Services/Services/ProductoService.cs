@@ -20,7 +20,7 @@ namespace TPI.Services.Services
             if (categoria is null)
                 throw new InvalidOperationException("Categoria no encontrada.");
             var prod = new Producto
-            {
+                {
                 Nombre = dto.Nombre,
                 Descripcion = dto.Descripcion,
                 Stock = dto.Stock,

@@ -8,19 +8,16 @@ namespace Dominio.Entities
 {
     public class Venta
     {
-        public int Id { get; set; }
+        public int IdVenta { get; set; }
         public int NroVenta { get; set; }
-        public Usuario User { get; set; }
-        public Producto Producto { get; set; }
+        public int IdUsuario { get; set; }
+        public Usuario Usuario { get; set; }
+        public int IdMetodoPago { get; set; }
         public MetodoPago MetodoPago { get; set; }
-        public DateOnly Fecha { get; set; }
         public decimal Total { get; set; }
-        public enum EstadoVenta
-        {
-            NoPagado,
-            Pagado,
-            Rechazado
-        }
+        public string Estado { get; set; } = "NoPagado";
+
+        public ICollection<DetalleVenta> Detalles { get; set; } = new List<DetalleVenta>();
 
         public Venta() { }
     }

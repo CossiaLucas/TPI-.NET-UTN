@@ -15,7 +15,7 @@ namespace TPI.Services.Services
         public async Task<CategoriaDTO> CreateAsync(CategoriaCreateDTO dto)
         {
             var categoria = new Categoria
-            {
+                {
                 Nombre = dto.Nombre
             };
             await _categoriaRepository.AddAsync(categoria);
@@ -26,7 +26,7 @@ namespace TPI.Services.Services
             return await _categoriaRepository.DeleteAsync(id);
         }
         public async Task<List<CategoriaDTO>> GetAllAsync()
-        {
+                {
             var items = await _categoriaRepository.GetAllAsync();
             return items.Select(ToDto).ToList();
         }
@@ -44,7 +44,7 @@ namespace TPI.Services.Services
             return await _categoriaRepository.UpdateAsync(entidad);
         }
         private static CategoriaDTO ToDto(Categoria c)
-        {
+            {
             return new CategoriaDTO { Id = c.Id, Nombre = c.Nombre };
         }
     }

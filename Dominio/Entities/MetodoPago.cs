@@ -8,7 +8,7 @@ namespace Dominio.Entities
 {
     public class MetodoPago
     {
-        public int Id { get; set; }
+        public int IdMetodoPago { get; set; }
         public string Nombre { get; set; }
 
         public MetodoPago() { }
