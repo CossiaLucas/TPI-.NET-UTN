@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace TPI.Services.DTOs
 {
-    public class ProductoDto
+    public class ProductoDTO
     {
-        public int IdProducto { get; set; }
+        public int Id { get; set; }
         public int IdCategoria { get; set; }
         public string NombreCategoria { get; set; } = string.Empty;
 
