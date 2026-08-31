@@ -8,6 +8,11 @@ namespace TPI.Data.Context
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
+
+        }
+
+        internal AppDbContext()
+        {
         }
 
         public DbSet<Direccion> Direcciones => Set<Direccion>();
@@ -21,6 +26,8 @@ namespace TPI.Data.Context
         public DbSet<MetodoPago> MetodosPago => Set<MetodoPago>();
         public DbSet<Venta> Ventas => Set<Venta>();
         public DbSet<DetalleVenta> DetallesVenta => Set<DetalleVenta>();
+
+        public DbSet<Direccion> Direcciones => Set<Direccion>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -133,6 +140,7 @@ namespace TPI.Data.Context
                       .IsUnique();
             });
 
+
             // ==========================================
             // Producto
             // ==========================================
@@ -141,6 +149,7 @@ namespace TPI.Data.Context
                 entity.ToTable("producto");
 
                 entity.HasKey(e => e.IdProducto);
+                entity.HasKey(e => e.Id);
 
                 entity.Property(e => e.Nombre)
                       .HasMaxLength(150)
@@ -179,6 +188,7 @@ namespace TPI.Data.Context
 
                 entity.HasOne(e => e.Producto)
                       .WithMany(p => p.Precios)
+                      .WithMany(p => p.HistorialPrecios)
                       .HasForeignKey(e => e.IdProducto)
                       .OnDelete(DeleteBehavior.Cascade);
             });
@@ -305,6 +315,65 @@ namespace TPI.Data.Context
                 entity.HasOne(e => e.MetodoPago)
                       .WithMany()
                       .HasForeignKey(e => e.IdMetodoPago)
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.ToTable("usuario");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Nombre)
+                      .HasMaxLength(100)
+                      .IsRequired();
+
+                entity.Property(e => e.Apellido)
+                      .HasMaxLength(100)
+                      .IsRequired();
+
+                entity.Property(e => e.Username)
+                      .HasMaxLength(50)
+                      .IsRequired();
+
+                entity.HasIndex(e => e.Username)
+                      .IsUnique();
+
+                entity.Property(e => e.ClaveHash)
+                      .HasMaxLength(255)
+                      .IsRequired();
+
+                entity.Property(e => e.Salt)
+                      .HasMaxLength(255)
+                      .IsRequired();
+
+                entity.Property(e => e.Email)
+                      .HasMaxLength(150)
+                      .IsRequired();
+
+                entity.HasIndex(e => e.Email)
+                      .IsUnique();
+
+                entity.Property(e => e.DNI)
+                      .HasMaxLength(20)
+                      .IsRequired();
+
+                entity.HasIndex(e => e.DNI)
+                      .IsUnique();
+
+                entity.Property(e => e.FechaAlta)
+                      .HasColumnType("datetime")
+                      .IsRequired();
+
+                entity.Property(e => e.Telefono)
+                      .HasMaxLength(30);
+
+                entity.Property(e => e.FechaNacimiento)
+                      .HasColumnType("date");
+
+                entity.Property(e => e.IsAdmin)
+                      .HasDefaultValue(false);
+
+                entity.HasOne(e => e.Direccion)
+                      .WithOne(d => d.Usuario)
+                      .HasForeignKey<Usuario>(u => u.IdDireccion)
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
@@ -336,6 +405,36 @@ namespace TPI.Data.Context
                 entity.HasOne(e => e.Producto)
                       .WithMany(p => p.DetallesVenta)
                       .HasForeignKey(e => e.IdProducto)
+            // Direccion
+            // ==========================================
+            modelBuilder.Entity<Direccion>(entity =>
+            {
+                entity.ToTable("direccion");
+
+                entity.HasKey(e => e.IdDireccion);
+
+                entity.Property(e => e.Calle)
+                      .HasMaxLength(100)
+                      .IsRequired();
+
+                entity.Property(e => e.Numero)
+                      .HasMaxLength(20)
+                      .IsRequired();
+
+                entity.Property(e => e.Piso)
+                      .HasMaxLength(20);
+
+                entity.Property(e => e.Departamento)
+                      .HasMaxLength(20);
+
+                entity.Property(e => e.CodigoPostal)
+                      .HasMaxLength(10)
+                      .IsRequired();
+
+                // Relación 1:1 con Usuario
+                entity.HasOne(e => e.Usuario)
+                      .WithOne(u => u.Direccion)
+                      .HasForeignKey<Usuario>(u => u.IdDireccion)
                       .OnDelete(DeleteBehavior.Restrict);
             });
         }

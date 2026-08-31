@@ -12,6 +12,7 @@ namespace Dominio.Entities
         public string Nombre { get; set; }
 
         public ICollection<Producto> Productos { get; set; } = new List<Producto>();
+
         public Categoria() { }
     }
 }

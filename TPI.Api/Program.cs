@@ -1,8 +1,16 @@
+using Dominio.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using TPI.Api;
 using TPI.Data.Context;
 using TPI.Services.Interfaces;
 using TPI.Services.Services;
 
+using TPI.Data.Repositories;
+using TPI.Services.Interfaces;
+using TPI.Services.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -26,7 +34,35 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 
 
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>(); //injeccion de dependencias para el repositorio de usuarios
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!))
+        };
+    });
+
 var app = builder.Build();
+
+//Para que se autogenere la base de datos si no existe
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    context.Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -37,6 +73,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.MapUsuarioEndpoints(); 
 
 app.MapControllers();
 
