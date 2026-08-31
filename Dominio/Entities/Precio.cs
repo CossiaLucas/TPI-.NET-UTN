@@ -12,6 +12,7 @@ namespace Dominio.Entities
         public Producto Producto { get; set; }
         public DateTime FechaDesde { get; set; }
         public decimal Valor { get; set; }
+        public Producto Producto { get; set; } = null!;
 
         public Precio() { }
     }
