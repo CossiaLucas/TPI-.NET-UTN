@@ -2,9 +2,6 @@ using Dominio.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using TPI.Api;
 using TPI.Data.Context;
-using TPI.Services.Interfaces;
-using TPI.Services.Services;
-
 using TPI.Data.Repositories;
 using TPI.Services.Interfaces;
 using TPI.Services.Services;

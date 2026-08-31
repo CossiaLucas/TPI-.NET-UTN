@@ -20,10 +20,7 @@ namespace Dominio.Entities
         public ICollection<Favorito> Favoritos { get; set; } = new List<Favorito>();
         public ICollection<ItemCarrito> ItemsCarrito { get; set; } = new List<ItemCarrito>();
         public ICollection<DetalleVenta> DetallesVenta { get; set; } = new List<DetalleVenta>();
-        public int IdCategoria { get; set; }
-        public Categoria Categoria { get; set; }
         public List<Precio> HistorialPrecios { get; set; } = new();
-        public string FotoUrl { get; set; }
 
         public Producto() { }
     }

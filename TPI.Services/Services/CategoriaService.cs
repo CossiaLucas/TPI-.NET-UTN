@@ -22,7 +22,7 @@ namespace TPI.Services.Services
                 .OrderBy(c => c.Nombre)
                 .Select(c => new CategoriaDto
                 {
-                    Id = c.Id,
+                    Id = c.IdCategoria,
                     Nombre = c.Nombre
                 })
                 .ToListAsync();
@@ -32,10 +32,10 @@ namespace TPI.Services.Services
         {
             return await _context.Categorias
                 .AsNoTracking()
-                .Where(c => c.Id == id)
+                .Where(c => c.IdCategoria == id)
                 .Select(c => new CategoriaDto
                 {
-                    Id = c.Id,
+                    Id = c.IdCategoria,
                     Nombre = c.Nombre
                 })
                 .FirstOrDefaultAsync();
@@ -63,7 +63,7 @@ namespace TPI.Services.Services
             _context.Categorias.Add(categoria);
             await _context.SaveChangesAsync();
 
-            dto.Id = categoria.Id;
+            dto.Id = categoria.IdCategoria;
             dto.Nombre = categoria.Nombre;
 
             return dto;
@@ -75,7 +75,7 @@ namespace TPI.Services.Services
                 throw new ArgumentException("El nombre de la categoría es obligatorio.");
 
             var categoria = await _context.Categorias
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .FirstOrDefaultAsync(c => c.IdCategoria == id);
 
             if (categoria == null)
                 return false;
@@ -84,7 +84,7 @@ namespace TPI.Services.Services
 
             bool existe = await _context.Categorias
                 .AnyAsync(c =>
-                    c.Id != id &&
+                    c.IdCategoria != id &&
                     c.Nombre.ToLower() == nombre.ToLower());
 
             if (existe)
@@ -101,7 +101,7 @@ namespace TPI.Services.Services
         public async Task<bool> EliminarAsync(int id)
         {
             var categoria = await _context.Categorias
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .FirstOrDefaultAsync(c => c.IdCategoria == id);
 
             if (categoria == null)
                 return false;

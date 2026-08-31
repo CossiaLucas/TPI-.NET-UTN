@@ -70,7 +70,7 @@ namespace TPI.Services.Services
         public async Task<IEnumerable<ProductoDto>> ObtenerPorCategoriaAsync(int idCategoria)
         {
             bool categoriaExiste = await _context.Categorias
-                .AnyAsync(c => c.Id == idCategoria);
+                .AnyAsync(c => c.IdCategoria == idCategoria);
 
             if (!categoriaExiste)
                 throw new KeyNotFoundException(
@@ -106,7 +106,7 @@ namespace TPI.Services.Services
             ValidarProducto(dto);
 
             bool categoriaExiste = await _context.Categorias
-                .AnyAsync(c => c.Id == dto.IdCategoria);
+                .AnyAsync(c => c.IdCategoria == dto.IdCategoria);
 
             if (!categoriaExiste)
                 throw new KeyNotFoundException(
@@ -131,7 +131,7 @@ namespace TPI.Services.Services
 
             var categoria = await _context.Categorias
                 .AsNoTracking()
-                .FirstAsync(c => c.Id == producto.IdCategoria);
+                .FirstAsync(c => c.IdCategoria == producto.IdCategoria);
 
             dto.NombreCategoria = categoria.Nombre;
             dto.Nombre = producto.Nombre;
@@ -154,7 +154,7 @@ namespace TPI.Services.Services
                 return false;
 
             bool categoriaExiste = await _context.Categorias
-                .AnyAsync(c => c.Id == dto.IdCategoria);
+                .AnyAsync(c => c.IdCategoria == dto.IdCategoria);
 
             if (!categoriaExiste)
                 throw new KeyNotFoundException(
