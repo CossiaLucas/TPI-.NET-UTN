@@ -1,3 +1,4 @@
+using Dominio.Entities;
 using Dominio.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -88,7 +89,44 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     //context.Database.Migrate();
     context.Database.EnsureCreated();
+    var usuarioRepository = scope.ServiceProvider.GetRequiredService<IUsuarioRepository>();
+    var categoriaRepository = scope.ServiceProvider.GetRequiredService<ICategoriaRepository>();
+    var productoRepository = scope.ServiceProvider.GetRequiredService<IProductoRepository>();
+
+    if (!await context.Usuarios.AnyAsync())
+    {
+        var admin = new Usuario(
+            nombre: "Admin",
+            apellido: "Capo",
+            username: "admin",
+            email: "admin@gmail.com",
+            password: "1234567",
+            dni: "12345678",
+            fechaNacimiento: DateTime.Now,
+            telefono: "000000000",
+            isAdmin: true);
+
+        await usuarioRepository.AddAsync(admin);
+    }
+
+    if (!await context.Categorias.AnyAsync())
+    {
+        var categoria = new Categoria { Nombre = "General" };
+        await categoriaRepository.AddAsync(categoria);
+
+        var producto = new Producto
+        {
+            Nombre = "Producto Demo",
+            Descripcion = "Producto de ejemplo",
+            Stock = 10,
+            IdCategoria = categoria.Id,
+            FotoUrl = null
+        };
+        await productoRepository.AddAsync(producto);
+    }
 }
+
+
 
 if (app.Environment.IsDevelopment())
 {
