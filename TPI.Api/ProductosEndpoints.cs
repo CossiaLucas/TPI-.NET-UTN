@@ -27,6 +27,7 @@ namespace TPI.Api
                     return Results.BadRequest(new { error = ex.Message });
                 }
             })
+            .RequireAuthorization()
             .WithName("AddProducto").Produces<ProductoDTO>(StatusCodes.Status201Created).Produces(StatusCodes.Status400BadRequest);
             app.MapPut("/productos", async (ProductoDTO dto, IProductoService service) =>
             {

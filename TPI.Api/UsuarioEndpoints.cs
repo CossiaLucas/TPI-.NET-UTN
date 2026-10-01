@@ -59,6 +59,8 @@ namespace TPI.Api
             })
             .WithName("DeleteUsuario")
             .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status404NotFound);        }
+            .Produces(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
+            }
     }
 }

@@ -1,13 +1,15 @@
+using Dominio.Entities;
 using Dominio.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using System.Text;
 using TPI.Api;
 using TPI.Data.Context;
 using TPI.Data.Repositories;
 using TPI.Services.Interfaces;
 using TPI.Services.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +20,22 @@ builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<IProductoService, ProductoService>();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "Ingresar el token con el formato: Bearer {token}",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
+    });
+});
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -72,7 +89,44 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     //context.Database.Migrate();
     context.Database.EnsureCreated();
+    var usuarioRepository = scope.ServiceProvider.GetRequiredService<IUsuarioRepository>();
+    var categoriaRepository = scope.ServiceProvider.GetRequiredService<ICategoriaRepository>();
+    var productoRepository = scope.ServiceProvider.GetRequiredService<IProductoRepository>();
+
+    if (!await context.Usuarios.AnyAsync())
+    {
+        var admin = new Usuario(
+            nombre: "Admin",
+            apellido: "Capo",
+            username: "admin",
+            email: "admin@gmail.com",
+            password: "1234567",
+            dni: "12345678",
+            fechaNacimiento: DateTime.Now,
+            telefono: "000000000",
+            isAdmin: true);
+
+        await usuarioRepository.AddAsync(admin);
+    }
+
+    if (!await context.Categorias.AnyAsync())
+    {
+        var categoria = new Categoria { Nombre = "General" };
+        await categoriaRepository.AddAsync(categoria);
+
+        var producto = new Producto
+        {
+            Nombre = "Producto Demo",
+            Descripcion = "Producto de ejemplo",
+            Stock = 10,
+            IdCategoria = categoria.Id,
+            FotoUrl = null
+        };
+        await productoRepository.AddAsync(producto);
+    }
 }
+
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -84,7 +138,9 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.MapUsuarioEndpoints(); 
+app.MapUsuarioEndpoints();
+
+app.MapAuthEndpoints();
 
 app.MapCategoriaEndpoints();
 

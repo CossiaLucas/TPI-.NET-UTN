@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using TPI.Services.DTOs;
 using TPI.Services.Interfaces;
+using TPI.ApiClients;
 
 namespace TPI.WinForms
 {
@@ -16,26 +17,27 @@ namespace TPI.WinForms
 
         private async void btnLogin_Click(object sender, EventArgs e)
         {
-            var dto = new LoginRequestDTO
+            try
             {
-                Email = txtEmail.Text,
-                Password = txtPassword.Text
-            };
+                var dto = new LoginRequestDTO { Email = txtEmail.Text, Password = txtPassword.Text };
+                var resultado = await _authService.LoginAsync(dto);
 
-            var resultado = await _authService.LoginAsync(dto);
+                if (resultado is null)
+                {
+                    MessageBox.Show("Email o contraseña incorrectos.", "Error de login",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
 
-            if (resultado is null)
-            {
-                MessageBox.Show("Email o contraseña incorrectos.", "Error de login",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                SesionActual.Iniciar(resultado);
+                DialogResult = DialogResult.OK;
+                Close();
             }
-
-            SesionActual.Iniciar(resultado); // guardamos el usuario logueado, ver clase abajo
-
-            var mainForm = Program.ServiceProvider.GetRequiredService<MainForm>();
-            mainForm.Show();
-            this.Hide();
+            catch (HttpRequestException)
+            {
+                MessageBox.Show("No se pudo conectar con el servidor. Verifica que estas corriendo TPI.Api",
+                    "Error de conexion", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
