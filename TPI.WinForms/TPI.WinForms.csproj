@@ -13,9 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ClassLibrary1\TPI.ApiClients.csproj" />
     <ProjectReference Include="..\Dominio\Dominio.csproj" />
     <ProjectReference Include="..\TPI.Api\TPI.Api.csproj" />
-    <ProjectReference Include="..\TPI.Data\TPI.Data.csproj" />
     <ProjectReference Include="..\TPI.Services\TPI.Services.csproj" />
   </ItemGroup>
 
