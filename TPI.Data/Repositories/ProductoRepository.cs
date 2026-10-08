@@ -33,17 +33,21 @@ namespace TPI.Data.Repositories
             return await _context.Productos
                 .AsNoTracking()
                 .Include(p => p.Categoria)
+                .Include(p => p.Precios)
                 .ToListAsync();
         }
         public async Task<Producto?> GetByIdAsync(int id)
         {
             return await _context.Productos
                 .Include(p => p.Categoria)
+                .Include(p => p.Precios)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
         public async Task<bool> UpdateAsync(Producto producto)
         {
-            _context.Productos.Update(producto);
+            if (_context.Entry(producto).State == EntityState.Detached)
+                _context.Productos.Update(producto);
+
             await _context.SaveChangesAsync();
             return true;
         }

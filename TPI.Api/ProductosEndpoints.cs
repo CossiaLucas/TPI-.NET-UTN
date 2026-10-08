@@ -1,4 +1,5 @@
-﻿using TPI.Services.DTOs;
+﻿using Microsoft.EntityFrameworkCore;
+using TPI.Services.DTOs;
 using TPI.Services.Interfaces;
 
 namespace TPI.Api
@@ -36,7 +37,7 @@ namespace TPI.Api
                     var found = await service.UpdateAsync(dto);
                     return found ? Results.NoContent() : Results.NotFound();
                 }
-                catch (ArgumentException ex)
+                catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
                 {
                     return Results.BadRequest(new { error = ex.Message });
                 }
@@ -44,8 +45,15 @@ namespace TPI.Api
             .WithName("UpdateProducto").Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound).Produces(StatusCodes.Status400BadRequest);
             app.MapDelete("/productos/{id}", async (int id, IProductoService service) =>
             {
-                var deleted = await service.DeleteAsync(id);
-                return deleted ? Results.NoContent() : Results.NotFound();
+                try
+                {
+                    var deleted = await service.DeleteAsync(id);
+                    return deleted ? Results.NoContent() : Results.NotFound();
+                }
+                catch (DbUpdateException)
+                {
+                    return Results.Conflict(new { error = "No se puede eliminar el producto porque tiene datos asociados." });
+                }
             })
             .WithName("DeleteProducto").Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
         }

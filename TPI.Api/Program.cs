@@ -16,9 +16,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddScoped<ICategoriaService, CategoriaService>();
-builder.Services.AddScoped<IProductoService, ProductoService>();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -48,9 +45,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     }
 });
 
-
-
-builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>(); 
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
@@ -60,10 +55,6 @@ builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<IProductoService, ProductoService>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
-
-
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -120,7 +111,8 @@ using (var scope = app.Services.CreateScope())
             Descripcion = "Producto de ejemplo",
             Stock = 10,
             IdCategoria = categoria.Id,
-            FotoUrl = null
+            FotoUrl = null,
+            Precios = { new Precio { FechaDesde = DateTime.Now, Valor = 1500m } }
         };
         await productoRepository.AddAsync(producto);
     }
