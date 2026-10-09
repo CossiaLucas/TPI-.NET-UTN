@@ -8,7 +8,7 @@ namespace TPI.ApiClients
 {
     public class CategoriaApiClient : BaseApiClient, ICategoriaService
     {
-        public CategoriaApiClient(HttpClient httpClient) : base(httpClient) { }
+        public CategoriaApiClient(HttpClient httpClient, ISessionService sesion) : base(httpClient, sesion) { }
 
         public async Task<CategoriaDTO> CreateAsync(CategoriaDTO dto)
         {

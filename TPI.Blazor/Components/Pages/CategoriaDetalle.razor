@@ -1,0 +1,75 @@
+﻿@page "/categorias/nueva"
+@page "/categorias/{Id:int}"
+@attribute [Authorize(Roles = "Admin")]
+@inject ICategoriaService CategoriaService
+@inject NavigationManager Nav
+
+<h3>@(Id is null ? "Nueva categoría" : "Editar categoría")</h3>
+
+@if (_cargando)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <EditForm Model="_model" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <InputText class="form-control" @bind-Value="_model.Nombre" />
+            <ValidationMessage For="() => _model.Nombre" />
+        </div>
+        @if (_error is not null)
+        {
+            <div class="alert alert-danger">@_error</div>
+        }
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a class="btn btn-secondary" href="/categorias">Cancelar</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private readonly CategoriaFormModel _model = new();
+    private bool _cargando = true;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (Id is not null)
+            {
+                var dto = await CategoriaService.GetByIdAsync(Id.Value);
+                if (dto is null) { Nav.NavigateTo("/categorias"); return; }
+                _model.Nombre = dto.Nombre;
+            }
+        }
+        catch (SesionExpiradaException) { return; }
+
+        _cargando = false;
+    }
+
+    private async Task Guardar()
+    {
+        try
+        {
+            if (Id is null)
+                await CategoriaService.CreateAsync(new CategoriaDTO { Nombre = _model.Nombre });
+            else
+                await CategoriaService.UpdateAsync(new CategoriaDTO { Id = Id.Value, Nombre = _model.Nombre });
+
+            Nav.NavigateTo("/categorias");
+        }
+        catch (SesionExpiradaException) { }
+        catch (HttpRequestException) { _error = "No se pudo guardar (¿nombre duplicado?)."; }
+    }
+
+    public class CategoriaFormModel
+    {
+        [Required(ErrorMessage = "El nombre es obligatorio.")]
+        [StringLength(100, ErrorMessage = "Máximo 100 caracteres.")]
+        public string Nombre { get; set; } = string.Empty;
+    }
+}

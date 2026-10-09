@@ -1,0 +1,70 @@
+﻿@page "/categorias"
+@attribute [Authorize(Roles = "Admin")]
+@inject ICategoriaService CategoriaService
+@inject IJSRuntime JS
+
+<h3>Categorías</h3>
+<a class="btn btn-primary mb-3" href="/categorias/nueva">Nueva</a>
+
+@if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (_categorias is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <table class="table">
+        <thead><tr><th>ID</th><th>Nombre</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var c in _categorias)
+            {
+                <tr>
+                    <td>@c.Id</td>
+                    <td>@c.Nombre</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-secondary" href="/categorias/@c.Id">Editar</a>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(c)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<CategoriaDTO>? _categorias;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync() => await Cargar();
+
+    private async Task Cargar()
+    {
+        try { _categorias = (await CategoriaService.GetAllAsync()).ToList(); }
+        catch (SesionExpiradaException) { /* el estado de auth cambio: Routes redirige al login */ }
+    }
+
+    private async Task Eliminar(CategoriaDTO c)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", $"¿Eliminar la categoría '{c.Nombre}'?")) return;
+
+        try
+        {
+            await CategoriaService.DeleteAsync(c.Id);
+            _error = null;
+            await Cargar();
+        }
+        catch (SesionExpiradaException) { }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
+        {
+            _error = "No se puede eliminar: la categoría tiene productos asociados.";
+        }
+        catch (HttpRequestException)
+        {
+            _error = "No se pudo eliminar la categoría.";
+        }
+    }
+}

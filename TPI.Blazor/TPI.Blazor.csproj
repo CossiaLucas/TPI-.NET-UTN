@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ClassLibrary1\TPI.ApiClients.csproj" />
     <ProjectReference Include="..\TPI.Api\TPI.Api.csproj" />
   </ItemGroup>
 

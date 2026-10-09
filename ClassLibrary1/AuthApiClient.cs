@@ -8,7 +8,7 @@ namespace TPI.ApiClients
 {
     public class AuthApiClient : BaseApiClient, IAuthService
     {
-        public AuthApiClient(HttpClient httpClient) : base(httpClient) { }
+        public AuthApiClient(HttpClient httpClient, ISessionService sesion) : base(httpClient, sesion) { }
 
         public async Task<LoginResponseDTO?> LoginAsync(LoginRequestDTO dto)
         {

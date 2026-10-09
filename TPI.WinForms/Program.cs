@@ -30,6 +30,7 @@ namespace TPI.WinForms
             services.AddHttpClient<IUsuarioService, UsuarioApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
             services.AddHttpClient<ICategoriaService, CategoriaApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
             services.AddHttpClient<IProductoService, ProductoApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
+            services.AddSingleton<ISessionService, SesionActual>();
 
             services.AddTransient<LoginForm>();
             services.AddTransient<MainForm>();
@@ -38,10 +39,11 @@ namespace TPI.WinForms
             services.AddTransient<ProductoListForm>();
             services.AddTransient<ProductoDetalleForm>();
             ServiceProvider = services.BuildServiceProvider();
+            var sesion = ServiceProvider.GetRequiredService<ISessionService>();
 
             while (true)
             {
-                if (!SesionActual.EstaLogueado)
+                if (!sesion.EstaLogueado)
                 {
                     var loginForm = ServiceProvider.GetRequiredService<LoginForm>();
                     if (loginForm.ShowDialog() != DialogResult.OK)
@@ -56,7 +58,7 @@ namespace TPI.WinForms
                 }
                 catch (SesionExpiradaException)
                 {
-                    SesionActual.CerrarSesion();
+                    sesion.CerrarSesion();
                     MessageBox.Show("Tu sesion expiro. Volve a iniciar sesion.", "Sesion expirada",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     continue;
@@ -70,7 +72,7 @@ namespace TPI.WinForms
         {
             if (e.Exception is SesionExpiradaException)
             {
-                SesionActual.CerrarSesion();
+                ServiceProvider.GetRequiredService<ISessionService>().CerrarSesion();
                 MessageBox.Show("Tu sesion expiro. La aplicacion se va a reiniciar.", "Sesion expirada",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 Application.Restart();

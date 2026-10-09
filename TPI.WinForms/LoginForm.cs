@@ -1,18 +1,20 @@
 using Microsoft.Extensions.DependencyInjection;
+using TPI.ApiClients;
 using TPI.Services.DTOs;
 using TPI.Services.Interfaces;
-using TPI.ApiClients;
 
 namespace TPI.WinForms
 {
     public partial class LoginForm : Form
     {
         private readonly IAuthService _authService;
+        private readonly ISessionService _sessionService;
 
-        public LoginForm(IAuthService authService)
+        public LoginForm(IAuthService authService, ISessionService sessionService)
         {
             InitializeComponent();
             _authService = authService;
+            _sessionService = sessionService;
         }
 
         private async void btnLogin_Click(object sender, EventArgs e)
@@ -29,7 +31,7 @@ namespace TPI.WinForms
                     return;
                 }
 
-                SesionActual.Iniciar(resultado);
+                _sessionService.Iniciar(resultado);
                 DialogResult = DialogResult.OK;
                 Close();
             }
