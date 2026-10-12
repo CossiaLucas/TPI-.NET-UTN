@@ -144,6 +144,10 @@ app.MapCategoriaEndpoints();
 
 app.MapProductoEndpoints();
 
+app.MapVentaEndpoints();
+
+app.MapDetalleVentaEndpoints();
+
 app.MapControllers();
 
 app.Run();
