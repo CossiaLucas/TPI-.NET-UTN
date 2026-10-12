@@ -7,7 +7,7 @@ namespace TPI.ApiClients
 {
     public class ProductoApiClient : BaseApiClient, IProductoService
     {
-        public ProductoApiClient(HttpClient httpClient) : base(httpClient) { }
+        public ProductoApiClient(HttpClient httpClient, ISessionService sesion) : base(httpClient, sesion) { }
 
         public async Task<ProductoDTO> CreateAsync(ProductoDTO dto)
         {

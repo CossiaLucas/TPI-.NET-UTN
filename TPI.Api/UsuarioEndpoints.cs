@@ -14,13 +14,19 @@ namespace TPI.Api
             })
             .WithName("GetUsuario")
             .Produces<UsuarioDTO>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status404NotFound)
+            .RequireAuthorization("SoloAdmin");
+
+
             app.MapGet("/usuarios", async (IUsuarioService usuarioService) =>
             {
                 return Results.Ok(await usuarioService.GetAllAsync());
             })
             .WithName("GetAllUsuarios")
-            .Produces<List<UsuarioDTO>>(StatusCodes.Status200OK);
+            .Produces<List<UsuarioDTO>>(StatusCodes.Status200OK)
+            .RequireAuthorization("SoloAdmin");
+
+
             app.MapPost("/usuarios", async (UsuarioCreateDTO dto, IUsuarioService usuarioService) =>
             {
                 try
@@ -36,6 +42,8 @@ namespace TPI.Api
             .WithName("AddUsuario")
             .Produces<UsuarioDTO>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
+
+
             app.MapPut("/usuarios", async (UsuarioUpdateDTO dto, IUsuarioService usuarioService) =>
             {
                 try
@@ -51,7 +59,10 @@ namespace TPI.Api
             .WithName("UpdateUsuario")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status400BadRequest);
+            .Produces(StatusCodes.Status400BadRequest)
+            .RequireAuthorization("SoloAdmin");
+
+
             app.MapDelete("/usuarios/{id}", async (int id, IUsuarioService usuarioService) =>
             {
                 var deleted = await usuarioService.DeleteAsync(id);
@@ -60,7 +71,7 @@ namespace TPI.Api
             .WithName("DeleteUsuario")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
-            .RequireAuthorization();
+            .RequireAuthorization("SoloAdmin");
             }
     }
 }

@@ -15,22 +15,23 @@ namespace TPI.WinForms
 {
     public partial class MainForm : Form
     {
-        public MainForm()
+        private readonly ISessionService _sesionService;
+        public MainForm(ISessionService _sesion)
         {
             InitializeComponent();
+            _sesionService = _sesion;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            lblBienvenida.Text = $"Hola, {SesionActual.Usuario!.Nombre}";
+            lblBienvenida.Text = $"Hola, {_sesionService.Usuario!.Nombre}";
 
             // Los CRUD de Producto/Categoria solo los veria un admin.
             // Si mas adelante seagrega algo para el usuario comun, va aca tambian,
-            // condicionado a !SesionActual.Usuario.IsAdmin.
+            // condicionado a !_sesionService.Usuario.IsAdmin.
 
-
-           // menuProductos.Visible = SesionActual.Usuario.IsAdmin; esta linea seria si en un futuro los menus de producto y categorias los ve solo el admin
-           // menuCategorias.Visible = SesionActual.Usuario.IsAdmin;    por ahora para la entrega 2 asumo que no
+           // menuProductos.Visible = _sesionService.Usuario.IsAdmin; esta linea seria si en un futuro los menus de producto y categorias los ve solo el admin
+           // menuCategorias.Visible = _sesionService.Usuario.IsAdmin;    por ahora para la entrega 2 asumo que no
         }
 
         private void menuProductos_Click(object sender, EventArgs e)
@@ -50,7 +51,7 @@ namespace TPI.WinForms
         private void menuLogout_Click(object sender, EventArgs e)
         {
             SalirDeLaApp = false;
-            SesionActual.CerrarSesion();
+            _sesionService.CerrarSesion();
             this.Close();
         }
     }

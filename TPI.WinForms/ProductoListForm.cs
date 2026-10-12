@@ -10,21 +10,28 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TPI.Services.DTOs;
 using TPI.Services.Interfaces;
+using TPI.ApiClients;
 
 namespace TPI.WinForms
 {
     public partial class ProductoListForm : Form
     {
         private readonly IProductoService _productoService;
+        private readonly ISessionService _sessionService;
 
-        public ProductoListForm(IProductoService productoService)
+        public ProductoListForm(IProductoService productoService, ISessionService sessionService)
         {
             InitializeComponent();
             _productoService = productoService;
+            _sessionService = sessionService;
         }
 
         private async void ProductoListForm_Load(object sender, EventArgs e)
         {
+            var esAdmin = _sessionService.Usuario?.IsAdmin == true;
+            tsbEditar.Visible = esAdmin;
+            tsbNuevo.Visible = esAdmin;
+            tsbEliminar.Visible = esAdmin;
             ConfigurarGrilla();
             await ListarAsync();
         }

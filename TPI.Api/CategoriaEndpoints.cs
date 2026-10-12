@@ -12,9 +12,15 @@ namespace TPI.Api
                 var dto = await service.GetByIdAsync(id);
                 return dto is null ? Results.NotFound() : Results.Ok(dto);
             })
-            .WithName("GetCategoria").Produces<CategoriaDTO>(StatusCodes.Status200OK).Produces(StatusCodes.Status404NotFound);
+            .WithName("GetCategoria")
+            .Produces<CategoriaDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .RequireAuthorization(); 
+
             app.MapGet("/categorias", async (ICategoriaService service) => Results.Ok(await service.GetAllAsync()))
-                .WithName("GetAllCategorias").Produces<IEnumerable<CategoriaDTO>>(StatusCodes.Status200OK);
+                .WithName("GetAllCategorias").Produces<IEnumerable<CategoriaDTO>>(StatusCodes.Status200OK).RequireAuthorization();
+
+
             app.MapPost("/categorias", async (CategoriaDTO dto, ICategoriaService service) =>
             {
                 try
@@ -27,7 +33,10 @@ namespace TPI.Api
                     return Results.BadRequest(new { error = ex.Message });
                 }
             })
-            .WithName("AddCategoria").Produces<CategoriaDTO>(StatusCodes.Status201Created).Produces(StatusCodes.Status400BadRequest);
+            .WithName("AddCategoria").Produces<CategoriaDTO>(StatusCodes.Status201Created).Produces(StatusCodes.Status400BadRequest).RequireAuthorization("SoloAdmin");
+
+
+
             app.MapPut("/categorias", async (CategoriaDTO dto, ICategoriaService service) =>
             {
                 try
@@ -40,7 +49,13 @@ namespace TPI.Api
                     return Results.BadRequest(new { error = ex.Message });
                 }
             })
-            .WithName("UpdateCategoria").Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound).Produces(StatusCodes.Status400BadRequest);
+            .WithName("UpdateCategoria")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status400BadRequest)
+            .RequireAuthorization("SoloAdmin"); 
+
+
             app.MapDelete("/categorias/{id}", async (int id, ICategoriaService service) =>
             {
                 try
@@ -53,7 +68,10 @@ namespace TPI.Api
                     return Results.Conflict(new { error = "No se puede eliminar la categoría porque tiene datos asociados." });
                 }
             })
-            .WithName("DeleteCategoria").Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
+            .WithName("DeleteCategoria")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound)
+            .RequireAuthorization("SoloAdmin"); 
         }
     }
 }

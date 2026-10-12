@@ -1,0 +1,79 @@
+﻿@page "/productos"
+@attribute [Authorize]
+@inject IProductoService ProductoService
+@inject IJSRuntime JS
+
+<h3>Productos</h3>
+<AuthorizeView Roles="Admin">
+<a class="btn btn-primary mb-3" href="/productos/nuevo">Nuevo</a>
+</AuthorizeView>
+
+@if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (_productos is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr><th>ID</th><th>Nombre</th><th>Categoría</th><th>Stock</th><th>Precio</th><AuthorizeView Roles="Admin"><th></th></AuthorizeView></tr>
+        </thead>
+        <tbody>
+            @foreach (var p in _productos)
+            {
+                <tr>
+                    <td>@p.Id</td>
+                    <td>@p.Nombre</td>
+                    <td>@p.NombreCategoria</td>
+                    <td>@p.Stock</td>
+                    <td>@p.PrecioActual?.ToString("C2")</td>
+                    <AuthorizeView Roles="Admin">
+                    <td>
+                        <a class="btn btn-sm btn-outline-secondary" href="/productos/@p.Id">Editar</a>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(p)">Eliminar</button>
+                    </td>
+                    </AuthorizeView>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<ProductoDTO>? _productos;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync() => await Cargar();
+
+    private async Task Cargar()
+    {
+        try { _productos = (await ProductoService.GetAllAsync()).ToList(); }
+        catch (SesionExpiradaException) { /* Routes redirige al login */ }
+    }
+
+    private async Task Eliminar(ProductoDTO p)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", $"¿Eliminar el producto '{p.Nombre}'?")) return;
+
+        try
+        {
+            await ProductoService.DeleteAsync(p.Id);
+            _error = null;
+            await Cargar();
+        }
+        catch (SesionExpiradaException) { }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
+        {
+            _error = "No se puede eliminar: el producto está asociado a ventas, carritos o favoritos.";
+        }
+        catch (HttpRequestException)
+        {
+            _error = "No se pudo eliminar el producto.";
+        }
+    }
+}

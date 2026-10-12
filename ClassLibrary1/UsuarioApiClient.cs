@@ -8,7 +8,7 @@ namespace TPI.ApiClients
 {
     public class UsuarioApiClient : BaseApiClient, IUsuarioService
     {
-        public UsuarioApiClient(HttpClient httpClient) : base(httpClient) { }
+        public UsuarioApiClient(HttpClient httpClient, ISessionService sesion) : base(httpClient, sesion) { }
 
         public async Task<UsuarioDTO> CreateAsync(UsuarioCreateDTO dto)
         {

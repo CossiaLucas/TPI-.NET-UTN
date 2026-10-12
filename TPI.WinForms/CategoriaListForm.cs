@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using TPI.Services.DTOs;
 using TPI.Services.Interfaces;
+using TPI.ApiClients;
 
 
 namespace TPI.WinForms
@@ -8,15 +9,20 @@ namespace TPI.WinForms
     public partial class CategoriaListForm : Form
     {
         private readonly ICategoriaService _categoriaService;
-
-        public CategoriaListForm(ICategoriaService categoriaService)
+        private readonly ISessionService _sessionService;
+        public CategoriaListForm(ICategoriaService categoriaService, ISessionService sessionService)
         {
             InitializeComponent();
             _categoriaService = categoriaService;
+            _sessionService = sessionService;
         }
 
         private async void Categorias_Load(object sender, EventArgs e)
         {
+            var esAdmin = _sessionService.Usuario?.IsAdmin == true;
+            tsbEditar.Visible = esAdmin;
+            tsbNuevo.Visible = esAdmin;
+            tsbEliminar.Visible = esAdmin;
             ConfigurarGrilla();
             await ListarAsync();
         }

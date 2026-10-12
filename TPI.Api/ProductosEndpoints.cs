@@ -13,9 +13,16 @@ namespace TPI.Api
                 var dto = await service.GetByIdAsync(id);
                 return dto is null ? Results.NotFound() : Results.Ok(dto);
             })
-            .WithName("GetProducto").Produces<ProductoDTO>(StatusCodes.Status200OK).Produces(StatusCodes.Status404NotFound);
+            .WithName("GetProducto")
+            .Produces<ProductoDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .RequireAuthorization(); 
+
+
             app.MapGet("/productos", async (IProductoService service) => Results.Ok(await service.GetAllAsync()))
-                .WithName("GetAllProductos").Produces<IEnumerable<ProductoDTO>>(StatusCodes.Status200OK);
+                .WithName("GetAllProductos").Produces<IEnumerable<ProductoDTO>>(StatusCodes.Status200OK).RequireAuthorization();
+
+
             app.MapPost("/productos", async (ProductoDTO dto, IProductoService service) =>
             {
                 try
@@ -28,8 +35,12 @@ namespace TPI.Api
                     return Results.BadRequest(new { error = ex.Message });
                 }
             })
-            .RequireAuthorization()
-            .WithName("AddProducto").Produces<ProductoDTO>(StatusCodes.Status201Created).Produces(StatusCodes.Status400BadRequest);
+            .WithName("AddProducto")
+            .Produces<ProductoDTO>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
+            .RequireAuthorization("SoloAdmin");
+
+           
             app.MapPut("/productos", async (ProductoDTO dto, IProductoService service) =>
             {
                 try
@@ -42,7 +53,13 @@ namespace TPI.Api
                     return Results.BadRequest(new { error = ex.Message });
                 }
             })
-            .WithName("UpdateProducto").Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound).Produces(StatusCodes.Status400BadRequest);
+            .WithName("UpdateProducto")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status400BadRequest)
+            .RequireAuthorization("SoloAdmin");
+
+
             app.MapDelete("/productos/{id}", async (int id, IProductoService service) =>
             {
                 try
@@ -55,7 +72,10 @@ namespace TPI.Api
                     return Results.Conflict(new { error = "No se puede eliminar el producto porque tiene datos asociados." });
                 }
             })
-            .WithName("DeleteProducto").Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
+            .WithName("DeleteProducto")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound)
+            .RequireAuthorization("SoloAdmin"); 
         }
     }
 }
