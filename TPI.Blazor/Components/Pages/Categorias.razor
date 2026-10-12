@@ -1,10 +1,12 @@
 ﻿@page "/categorias"
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize]
 @inject ICategoriaService CategoriaService
 @inject IJSRuntime JS
 
 <h3>Categorías</h3>
-<a class="btn btn-primary mb-3" href="/categorias/nueva">Nueva</a>
+<AuthorizeView Roles="Admin">
+    <a class="btn btn-primary mb-3" href="/categorias/nueva">Nueva</a>
+</AuthorizeView>
 
 @if (_error is not null)
 {
@@ -18,17 +20,26 @@
 else
 {
     <table class="table">
-        <thead><tr><th>ID</th><th>Nombre</th><th></th></tr></thead>
+        <thead>
+            <tr>
+
+            <th>ID</th><th>Nombre</th>
+            <AuthorizeView Roles="Admin"><th></th></AuthorizeView>
+            
+            </tr>
+        </thead>
         <tbody>
             @foreach (var c in _categorias)
             {
                 <tr>
                     <td>@c.Id</td>
                     <td>@c.Nombre</td>
-                    <td>
-                        <a class="btn btn-sm btn-outline-secondary" href="/categorias/@c.Id">Editar</a>
-                        <button class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(c)">Eliminar</button>
-                    </td>
+                    <AuthorizeView Roles="Admin">
+                        <td>
+                            <a class="btn btn-sm btn-outline-secondary" href="/categorias/@c.Id">Editar</a>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(c)">Eliminar</button>
+                        </td>
+                    </AuthorizeView>
                 </tr>
             }
         </tbody>

@@ -9,11 +9,11 @@
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="TPI.Blazor.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <HeadOutlet />
+    <HeadOutlet @rendermode="RenderMode" />
 </head>
 
 <body>
-    <Routes />
+    <Routes @rendermode="RenderMode" />
 
     @code {
         private static readonly IComponentRenderMode RenderMode = new InteractiveServerRenderMode(prerender: false);

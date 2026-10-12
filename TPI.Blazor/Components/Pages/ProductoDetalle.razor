@@ -1,0 +1,160 @@
+﻿@page "/productos/nuevo"
+@page "/productos/{Id:int}"
+@attribute [Authorize(Roles = "Admin")]
+@inject IProductoService ProductoService
+@inject ICategoriaService CategoriaService
+@inject NavigationManager Nav
+
+<h3>@(Id is null ? "Nuevo producto" : "Editar producto")</h3>
+
+@if (_cargando)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <EditForm Model="_model" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <InputText class="form-control" @bind-Value="_model.Nombre" />
+            <ValidationMessage For="() => _model.Nombre" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            <InputTextArea class="form-control" @bind-Value="_model.Descripcion" />
+            <ValidationMessage For="() => _model.Descripcion" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Categoría</label>
+            <InputSelect class="form-select" @bind-Value="_model.IdCategoria">
+                <option value="0">-- Seleccioná --</option>
+                @foreach (var c in _categorias)
+                {
+                    <option value="@c.Id">@c.Nombre</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="() => _model.IdCategoria" />
+        </div>
+
+        <div class="row">
+            <div class="col mb-3">
+                <label class="form-label">Stock</label>
+                <InputNumber class="form-control" @bind-Value="_model.Stock" />
+                <ValidationMessage For="() => _model.Stock" />
+            </div>
+            <div class="col mb-3">
+                <label class="form-label">Precio</label>
+                <InputNumber class="form-control" @bind-Value="_model.Precio" />
+                <ValidationMessage For="() => _model.Precio" />
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">URL de la foto (opcional)</label>
+            <InputText class="form-control" @bind-Value="_model.FotoUrl" />
+        </div>
+
+        @if (_error is not null)
+        {
+            <div class="alert alert-danger">@_error</div>
+        }
+
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a class="btn btn-secondary" href="/productos">Cancelar</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private readonly ProductoFormModel _model = new();
+    private List<CategoriaDTO> _categorias = new();
+    private bool _cargando = true;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _categorias = (await CategoriaService.GetAllAsync()).ToList();
+
+            if (Id is not null)
+            {
+                var dto = await ProductoService.GetByIdAsync(Id.Value);
+                if (dto is null) { Nav.NavigateTo("/productos"); return; }
+
+                _model.Nombre = dto.Nombre;
+                _model.Descripcion = dto.Descripcion;
+                _model.IdCategoria = dto.IdCategoria;
+                _model.Stock = dto.Stock;
+                _model.Precio = dto.PrecioActual ?? 0;
+                _model.FotoUrl = dto.FotoUrl;
+            }
+        }
+        catch (SesionExpiradaException) { return; }
+
+        _cargando = false;
+    }
+
+    private async Task Guardar()
+    {
+        var foto = string.IsNullOrWhiteSpace(_model.FotoUrl) ? null : _model.FotoUrl;
+
+        try
+        {
+            if (Id is null)
+            {
+                await ProductoService.CreateAsync(new ProductoDTO
+                {
+                    IdCategoria = _model.IdCategoria,
+                    Nombre = _model.Nombre,
+                    Descripcion = _model.Descripcion,
+                    Stock = _model.Stock,
+                    FotoUrl = foto,
+                    PrecioActual = _model.Precio
+                });
+            }
+            else
+            {
+                await ProductoService.UpdateAsync(new ProductoDTO
+                {
+                    Id = Id.Value,
+                    IdCategoria = _model.IdCategoria,
+                    Nombre = _model.Nombre,
+                    Descripcion = _model.Descripcion,
+                    Stock = _model.Stock,
+                    FotoUrl = foto,
+                    PrecioActual = _model.Precio
+                });
+            }
+
+            Nav.NavigateTo("/productos");
+        }
+        catch (SesionExpiradaException) { }
+        catch (HttpRequestException) { _error = "No se pudo guardar el producto."; }
+    }
+
+    public class ProductoFormModel
+    {
+        [Required(ErrorMessage = "El nombre es obligatorio.")]
+        public string Nombre { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "La descripción es obligatoria.")]
+        public string Descripcion { get; set; } = string.Empty;
+
+        [Range(1, int.MaxValue, ErrorMessage = "Seleccioná una categoría.")]
+        public int IdCategoria { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "El stock no puede ser negativo.")]
+        public int Stock { get; set; }
+
+        [Range(0.01, 999999999, ErrorMessage = "El precio debe ser mayor a cero.")]
+        public decimal Precio { get; set; }
+
+        public string? FotoUrl { get; set; }
+    }
+}

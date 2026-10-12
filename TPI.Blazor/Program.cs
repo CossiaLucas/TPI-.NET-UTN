@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using TPI.ApiClients;
 using TPI.Blazor;
@@ -20,6 +21,7 @@ var apiBaseUrl = builder.Configuration["ApiBaseUrl"]!;
 builder.Services.AddHttpClient<IAuthService, AuthApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
 builder.Services.AddHttpClient<ICategoriaService, CategoriaApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
 builder.Services.AddHttpClient<IProductoService, ProductoApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, BlazorAuthorizationMiddlewareResultHandler>();
 
 var app = builder.Build();
 
