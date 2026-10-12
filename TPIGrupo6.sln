@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPI.Blazor", "TPI.Blazor\TP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPI.Api", "TPI.Api\TPI.Api.csproj", "{F71475D9-F7F7-453D-A1C7-A0907E8FCF9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPI.ApiClients", "ClassLibrary1\TPI.ApiClients.csproj", "{8CD578AE-0903-46AE-A8E1-2D0C7E090A0F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPI.ApiClients", "TPI.ApiClients\TPI.ApiClients.csproj", "{206BD0C1-15C2-DC21-C14C-BA130EB53D9B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +47,10 @@ Global
 		{F71475D9-F7F7-453D-A1C7-A0907E8FCF9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F71475D9-F7F7-453D-A1C7-A0907E8FCF9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F71475D9-F7F7-453D-A1C7-A0907E8FCF9A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8CD578AE-0903-46AE-A8E1-2D0C7E090A0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8CD578AE-0903-46AE-A8E1-2D0C7E090A0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8CD578AE-0903-46AE-A8E1-2D0C7E090A0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8CD578AE-0903-46AE-A8E1-2D0C7E090A0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{206BD0C1-15C2-DC21-C14C-BA130EB53D9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{206BD0C1-15C2-DC21-C14C-BA130EB53D9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{206BD0C1-15C2-DC21-C14C-BA130EB53D9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{206BD0C1-15C2-DC21-C14C-BA130EB53D9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
