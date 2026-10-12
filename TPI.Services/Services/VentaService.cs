@@ -18,18 +18,17 @@ namespace TPI.Services.Services
 
         public async Task<VentaDTO> CreateAsync(VentaDTO dto)
         {
-            Validar(dto);
+            Validar(dto, requiereNumero: false);
 
             var venta = new Venta
             {
-                NroVenta = dto.NroVenta,
                 IdUsuario = dto.IdUsuario,
                 IdMetodoPago = dto.IdMetodoPago,
                 Estado = string.IsNullOrWhiteSpace(dto.Estado) ? "NoPagado" : dto.Estado
             };
 
             foreach (var detalleDto in dto.Detalles)
-                venta.Detalles.Add(await CrearDetalleAsync(dto.NroVenta, detalleDto));
+                venta.Detalles.Add(await CrearDetalleAsync(venta, detalleDto));
 
             venta.Total = venta.Detalles.Sum(d => d.Subtotal);
             await _ventaRepository.AddAsync(venta);
@@ -55,7 +54,7 @@ namespace TPI.Services.Services
 
         public async Task<bool> UpdateAsync(VentaDTO dto)
         {
-            Validar(dto);
+            Validar(dto, requiereNumero: true);
 
             var venta = await _ventaRepository.GetByNroVentaAsync(dto.NroVenta);
             if (venta is null)
@@ -67,7 +66,7 @@ namespace TPI.Services.Services
 
             var detallesNuevos = new List<DetalleVenta>();
             foreach (var detalleDto in dto.Detalles)
-                detallesNuevos.Add(await CrearDetalleAsync(dto.NroVenta, detalleDto));
+                detallesNuevos.Add(await CrearDetalleAsync(venta, detalleDto));
 
             venta.Detalles.Clear();
             foreach (var detalle in detallesNuevos)
@@ -77,7 +76,7 @@ namespace TPI.Services.Services
             return await _ventaRepository.UpdateAsync(venta);
         }
 
-        private async Task<DetalleVenta> CrearDetalleAsync(int nroVenta, DetalleVentaDTO dto)
+        private async Task<DetalleVenta> CrearDetalleAsync(Venta venta, DetalleVentaDTO dto)
         {
             if (dto.IdProducto <= 0)
                 throw new ArgumentException("El producto debe ser válido.", nameof(dto.IdProducto));
@@ -97,7 +96,8 @@ namespace TPI.Services.Services
             return new DetalleVenta
             {
                 IdDetalle = dto.IdDetalle,
-                IdVenta = nroVenta,
+                IdVenta = venta.NroVenta,
+                Venta = venta,
                 IdProducto = dto.IdProducto,
                 Cantidad = dto.Cantidad,
                 PrecioUnitario = Math.Round(precio, 2),
@@ -105,9 +105,9 @@ namespace TPI.Services.Services
             };
         }
 
-        private static void Validar(VentaDTO dto)
+        private static void Validar(VentaDTO dto, bool requiereNumero)
         {
-            if (dto.NroVenta <= 0)
+            if (requiereNumero && dto.NroVenta <= 0)
                 throw new ArgumentException("El número de venta debe ser mayor que cero.", nameof(dto.NroVenta));
             if (dto.IdUsuario <= 0)
                 throw new ArgumentException("El usuario debe ser válido.", nameof(dto.IdUsuario));

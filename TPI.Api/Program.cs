@@ -122,6 +122,12 @@ using (var scope = app.Services.CreateScope())
         };
         await productoRepository.AddAsync(producto);
     }
+
+    if (!await context.MetodosPago.AnyAsync())
+    {
+        context.MetodosPago.Add(new MetodoPago { Nombre = "Efectivo" });
+        await context.SaveChangesAsync();
+    }
 }
 
 

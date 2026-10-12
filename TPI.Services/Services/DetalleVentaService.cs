@@ -31,7 +31,7 @@ namespace TPI.Services.Services
 
             var detalle = await CrearEntidadAsync(dto);
             await _detalleRepository.AddAsync(detalle);
-            venta.Total = venta.Detalles.Sum(d => d.Subtotal) + detalle.Subtotal;
+            venta.Total = venta.Detalles.Sum(d => d.Subtotal);
             await _ventaRepository.UpdateAsync(venta);
 
             return ToDto(detalle);
