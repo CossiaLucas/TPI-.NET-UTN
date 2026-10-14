@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using TPI.Services.DTOs;
 using TPI.Services.Interfaces;
 
@@ -7,27 +8,37 @@ namespace TPI.Api
     {
         public static void MapVentaEndpoints(this WebApplication app)
         {
-            app.MapGet("/ventas/{nroVenta:int}", async (int nroVenta, IVentaService service) =>
+            app.MapGet("/ventas/{nroVenta:int}", async (int nroVenta, ClaimsPrincipal usuario, IVentaService service) =>
             {
                 var venta = await service.GetByNroVentaAsync(nroVenta);
-                return venta is null ? Results.NotFound() : Results.Ok(venta);
+                if (venta is null) return Results.NotFound();
+                if (!EsAdmin(usuario) && venta.IdUsuario != ObtenerIdUsuario(usuario)) return Results.Forbid();
+                return Results.Ok(venta);
             })
             .WithName("GetVenta")
             .Produces<VentaDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status403Forbidden)
             .RequireAuthorization();
 
-            app.MapGet("/ventas", async (IVentaService service) =>
-                Results.Ok(await service.GetAllAsync()))
-                .WithName("GetAllVentas")
-                .Produces<IEnumerable<VentaDTO>>(StatusCodes.Status200OK)
-                .RequireAuthorization();
+            //el usuari obtiene las suyas, el admin todas
+            app.MapGet("/ventas", async (ClaimsPrincipal user, IVentaService service) =>
+            {
+                var ventas = EsAdmin(user)
+                    ? await service.GetAllAsync()
+                    : await service.GetByUsuarioAsync(ObtenerIdUsuario(user));
+                return Results.Ok(ventas);
+            })
+            .WithName("GetAllVentas")
+            .Produces<IEnumerable<VentaDTO>>(StatusCodes.Status200OK)
+            .RequireAuthorization();
 
-            app.MapPost("/ventas", async (VentaDTO dto, IVentaService service) =>
+            //el comprador viene del token
+            app.MapPost("/ventas", async (VentaCreateDTO dto, ClaimsPrincipal user, IVentaService service) =>
             {
                 try
                 {
-                    var creada = await service.CreateAsync(dto);
+                    var creada = await service.CreateAsync(ObtenerIdUsuario(user), dto);
                     return Results.Created($"/ventas/{creada.NroVenta}", creada);
                 }
                 catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
@@ -40,7 +51,7 @@ namespace TPI.Api
             .Produces(StatusCodes.Status400BadRequest)
             .RequireAuthorization();
 
-            app.MapPut("/ventas", async (VentaDTO dto, IVentaService service) =>
+            app.MapPut("/ventas", async (VentaUpdateDTO dto, IVentaService service) =>
             {
                 try
                 {
@@ -67,6 +78,12 @@ namespace TPI.Api
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .RequireAuthorization();
+
+
         }
+        private static bool EsAdmin(ClaimsPrincipal user) => user.HasClaim("IsAdmin", "True");
+
+        private static int ObtenerIdUsuario(ClaimsPrincipal user) =>
+            int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
     }
 }

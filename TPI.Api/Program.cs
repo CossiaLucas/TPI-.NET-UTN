@@ -58,6 +58,9 @@ builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<IVentaService, VentaService>();
 builder.Services.AddScoped<IDetalleVentaService, DetalleVentaService>();
 
+builder.Services.AddScoped<IMetodoDePagoRepository, MetodoDePagoRepository>();
+builder.Services.AddScoped<IMetodoPagoService, MetodoPagoService>();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -125,7 +128,11 @@ using (var scope = app.Services.CreateScope())
 
     if (!await context.MetodosPago.AnyAsync())
     {
-        context.MetodosPago.Add(new MetodoPago { Nombre = "Efectivo" });
+        context.MetodosPago.AddRange(
+        new MetodoPago { Nombre = "Efectivo" },
+        new MetodoPago { Nombre = "Tarjeta de débito" },
+        new MetodoPago { Nombre = "Tarjeta de crédito" },
+        new MetodoPago { Nombre = "Transferencia" });
         await context.SaveChangesAsync();
     }
 }
@@ -152,7 +159,8 @@ app.MapProductoEndpoints();
 
 app.MapVentaEndpoints();
 
-app.MapDetalleVentaEndpoints();
+
+app.MapMetodoPagoEndpoints();
 
 app.MapControllers();
 
