@@ -10,4 +10,10 @@ namespace TPI.Services.DTOs
         public decimal PrecioUnitario { get; set; }
         public decimal Subtotal { get; set; }
     }
+
+    public class DetalleVentaCreateDTO
+    {
+        public int IdProducto { get; set; }
+        public int Cantidad { get; set; }
+    }
 }
