@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProductoListForm));
             tcCategorias = new ToolStripContainer();
             tlCategorias = new TableLayoutPanel();
             dgvProductos = new DataGridView();
@@ -124,7 +123,7 @@
             // tsbNuevo
             // 
             tsbNuevo.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsbNuevo.Image = (Image)resources.GetObject("tsbNuevo.Image");
+            tsbNuevo.Image = Properties.Resources.add_24dp_75FB4C_FILL0_wght400_GRAD0_opsz24;
             tsbNuevo.ImageTransparentColor = Color.Magenta;
             tsbNuevo.Name = "tsbNuevo";
             tsbNuevo.Size = new Size(23, 22);
@@ -134,7 +133,7 @@
             // tsbEditar
             // 
             tsbEditar.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsbEditar.Image = (Image)resources.GetObject("tsbEditar.Image");
+            tsbEditar.Image = Properties.Resources.edit_24dp_F19E39_FILL0_wght400_GRAD0_opsz24;
             tsbEditar.ImageTransparentColor = Color.Magenta;
             tsbEditar.Name = "tsbEditar";
             tsbEditar.Size = new Size(23, 22);
@@ -144,7 +143,7 @@
             // tsbEliminar
             // 
             tsbEliminar.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsbEliminar.Image = (Image)resources.GetObject("tsbEliminar.Image");
+            tsbEliminar.Image = Properties.Resources.delete_24dp_EA3323_FILL0_wght400_GRAD0_opsz24;
             tsbEliminar.ImageTransparentColor = Color.Magenta;
             tsbEliminar.Name = "tsbEliminar";
             tsbEliminar.Size = new Size(23, 22);

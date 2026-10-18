@@ -22,12 +22,19 @@ namespace TPI.Api
             .RequireAuthorization();
 
             //el usuari obtiene las suyas, el admin todas
-            app.MapGet("/ventas", async (ClaimsPrincipal user, IVentaService service) =>
+            app.MapGet("/ventas", async (string? estado, ClaimsPrincipal user, IVentaService service) =>
             {
-                var ventas = EsAdmin(user)
-                    ? await service.GetAllAsync()
-                    : await service.GetByUsuarioAsync(ObtenerIdUsuario(user));
-                return Results.Ok(ventas);
+                try
+                {
+                    var ventas = EsAdmin(user)
+                        ? await service.GetAllAsync(estado)
+                        : await service.GetByUsuarioAsync(ObtenerIdUsuario(user), estado);
+                    return Results.Ok(ventas);
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(new { error = ex.Message });
+                }
             })
             .WithName("GetAllVentas")
             .Produces<IEnumerable<VentaDTO>>(StatusCodes.Status200OK)

@@ -1,0 +1,306 @@
+﻿@page "/ventas/nueva"
+@page "/ventas/{NroVenta:int}"
+@attribute [Authorize]
+@inject IVentaApiClient VentaClient
+@inject IProductoService ProductoService
+@inject IMetodoPagoService MetodoPagoService
+@inject ISessionService Sesion
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<h3>@Titulo</h3>
+
+@if (_falloCarga)
+{
+    <div class="alert alert-danger">@_error</div>
+    <a class="btn btn-secondary" href="/ventas">Volver</a>
+}
+else if (_cargando)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <div class="mb-3">
+        <div><strong>N° de venta:</strong> @(NroVenta?.ToString() ?? "(se asigna al guardar)")</div>
+        <div><strong>Comprador:</strong> @_comprador</div>
+    </div>
+
+    <EditForm EditContext="_editContext">
+        <DataAnnotationsValidator />
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Método de pago</label>
+                <InputSelect class="form-select" @bind-Value="_model.IdMetodoPago" disabled="@(!EditaCabecera)">
+                    <option value="0">-- Seleccioná --</option>
+                    @foreach (var m in _metodos)
+                    {
+                        <option value="@m.IdMetodoPago">@m.Nombre</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => _model.IdMetodoPago" />
+            </div>
+
+            @if (NroVenta is not null)
+            {
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Estado</label>
+                    <InputSelect class="form-select" @bind-Value="_model.Estado" disabled="@(!EditaCabecera)">
+                        @foreach (var estado in EstadoVenta.Todos)
+                        {
+                            <option value="@estado">@estado</option>
+                        }
+                    </InputSelect>
+                </div>
+            }
+        </div>
+    </EditForm>
+
+    @if (EditaLineas)
+    {
+        <div class="card card-body mb-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label">Producto</label>
+                    <select class="form-select" @bind="_idProductoSel">
+                        <option value="0">-- Seleccioná --</option>
+                        @foreach (var p in _productos)
+                        {
+                            <option value="@p.IdProducto">@p.Nombre - @p.Precio.ToString("C2") (stock @p.Stock)</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Cantidad</label>
+                    <input type="number" class="form-control" min="1" @bind="_cantidadSel" />
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-outline-primary" @onclick="AgregarLinea">Agregar</button>
+                </div>
+            </div>
+            @if (_errorLinea is not null)
+            {
+                <div class="text-danger mt-2">@_errorLinea</div>
+            }
+        </div>
+    }
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio unit.</th>
+                <th>Subtotal</th>
+                @if (EditaLineas)
+                {
+                    <th></th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var l in _lineas)
+            {
+                <tr>
+                    <td>@l.Producto</td>
+                    <td>@l.Cantidad</td>
+                    <td>@l.PrecioUnitario.ToString("C2")</td>
+                    <td>@l.Subtotal.ToString("C2")</td>
+                    @if (EditaLineas)
+                    {
+                        <td><button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => QuitarLinea(l)">Quitar</button></td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h5>Total: @Total.ToString("C2")</h5>
+
+    @if (_error is not null)
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+
+    @if (EditaCabecera)
+    {
+        <button type="button" class="btn btn-primary" @onclick="Guardar">Guardar</button>
+    }
+    <a class="btn btn-secondary" href="/ventas">@(EditaCabecera ? "Cancelar" : "Volver")</a>
+}
+
+@code {
+    [Parameter] public int? NroVenta { get; set; }
+
+    private readonly VentaFormModel _model = new();
+    private EditContext _editContext = default!;
+    private readonly List<LineaVenta> _lineas = new();
+    private List<MetodoPagoDTO> _metodos = new();
+    private List<ProductoItem> _productos = new();
+
+    private bool _cargando = true;
+    private bool _falloCarga;
+    private bool _soloLectura;
+    private string _estadoOriginal = EstadoVenta.NoPagado;
+    private string _comprador = string.Empty;
+    private int _idProductoSel;
+    private int _cantidadSel = 1;
+    private string? _error;
+    private string? _errorLinea;
+
+    private bool EsAdmin => Sesion.Usuario?.IsAdmin == true;
+    private bool EditaCabecera => !_soloLectura;
+    private bool EditaLineas => !_soloLectura && _estadoOriginal == EstadoVenta.NoPagado;
+    private decimal Total => _lineas.Sum(l => l.Subtotal);
+    private string Titulo => NroVenta is null
+        ? "Nueva venta"
+        : _soloLectura ? $"Venta N° {NroVenta}" : $"Editar venta N° {NroVenta}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _editContext = new EditContext(_model);
+
+        try
+        {
+            _metodos = await MetodoPagoService.GetAllAsync();
+
+            // Solo se ofrecen productos con stock y con precio vigente
+            _productos = (await ProductoService.GetAllAsync())
+                .Where(p => p.Stock > 0 && p.PrecioActual is > 0)
+                .Select(p => new ProductoItem(p.Id, p.Nombre, p.PrecioActual!.Value, p.Stock))
+                .ToList();
+
+            if (NroVenta is null)
+            {
+                var u = Sesion.Usuario;
+                _comprador = $"{u?.Nombre} {u?.Apellido}";
+            }
+            else
+            {
+                var venta = await VentaClient.GetByNroVentaAsync(NroVenta.Value);
+                if (venta is null) { Nav.NavigateTo("/ventas"); return; }
+
+                _estadoOriginal = venta.Estado;
+                _comprador = venta.NombreUsuario;
+                _model.IdMetodoPago = venta.IdMetodoPago;
+                _model.Estado = venta.Estado;
+                _lineas.AddRange(venta.Detalles.Select(d => new LineaVenta
+                {
+                    IdProducto = d.IdProducto,
+                    Producto = d.NombreProducto,
+                    Cantidad = d.Cantidad,
+                    PrecioUnitario = d.PrecioUnitario
+                }));
+
+                // Una venta cancelada nunca se modifica; el usuario común solo mira
+                _soloLectura = !EsAdmin || venta.Estado == EstadoVenta.Cancelado;
+            }
+        }
+        catch (SesionExpiradaException) { return; }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
+        {
+            // Intentó abrir una venta ajena escribiendo la URL
+            Nav.NavigateTo("/ventas");
+            return;
+        }
+        catch (HttpRequestException ex)
+        {
+            _error = $"No se pudieron cargar los datos: {ex.Message}";
+            _falloCarga = true;
+        }
+
+        _cargando = false;
+    }
+
+    private void AgregarLinea()
+    {
+        _errorLinea = null;
+
+        var item = _productos.FirstOrDefault(p => p.IdProducto == _idProductoSel);
+        if (item is null) { _errorLinea = "Seleccioná un producto."; return; }
+        if (_cantidadSel < 1) { _errorLinea = "La cantidad debe ser mayor que cero."; return; }
+
+        var existente = _lineas.FirstOrDefault(l => l.IdProducto == item.IdProducto);
+        if (existente is null)
+        {
+            _lineas.Add(new LineaVenta
+            {
+                IdProducto = item.IdProducto,
+                Producto = item.Nombre,
+                Cantidad = _cantidadSel,
+                PrecioUnitario = item.Precio
+            });
+        }
+        else
+        {
+            // Mismo producto dos veces: se suman las cantidades (igual que hace el servidor)
+            existente.Cantidad += _cantidadSel;
+        }
+
+        _idProductoSel = 0;
+        _cantidadSel = 1;
+    }
+
+    private void QuitarLinea(LineaVenta linea) => _lineas.Remove(linea);
+
+    private async Task Guardar()
+    {
+        _error = null;
+
+        if (!_editContext.Validate()) return;
+        if (_lineas.Count == 0) { _error = "Agregá al menos un producto."; return; }
+
+        var detalles = _lineas
+            .Select(l => new DetalleVentaCreateDTO { IdProducto = l.IdProducto, Cantidad = l.Cantidad })
+            .ToList();
+
+        try
+        {
+            if (NroVenta is null)
+            {
+                await VentaClient.CreateAsync(
+                    new VentaCreateDTO { IdMetodoPago = _model.IdMetodoPago, Detalles = detalles });
+            }
+            else
+            {
+                if (_model.Estado == EstadoVenta.Cancelado && _estadoOriginal != EstadoVenta.Cancelado &&
+                    !await JS.InvokeAsync<bool>("confirm",
+                        "Al cancelar la venta se devuelve el stock y no podrá modificarse más. ¿Continuar?"))
+                    return;
+
+                var ok = await VentaClient.UpdateAsync(new VentaUpdateDTO
+                {
+                    NroVenta = NroVenta.Value,
+                    IdMetodoPago = _model.IdMetodoPago,
+                    Estado = _model.Estado,
+                    Detalles = detalles
+                });
+
+                if (!ok) { Nav.NavigateTo("/ventas"); return; }
+            }
+
+            Nav.NavigateTo("/ventas");
+        }
+        catch (SesionExpiradaException) { }
+        catch (HttpRequestException ex) { _error = ex.Message; }
+    }
+
+    public class VentaFormModel
+    {
+        [Range(1, int.MaxValue, ErrorMessage = "Seleccioná un método de pago.")]
+        public int IdMetodoPago { get; set; }
+
+        public string Estado { get; set; } = EstadoVenta.NoPagado;
+    }
+
+    public class LineaVenta
+    {
+        public int IdProducto { get; set; }
+        public string Producto { get; set; } = string.Empty;
+        public int Cantidad { get; set; }
+        public decimal PrecioUnitario { get; set; }
+        public decimal Subtotal => Cantidad * PrecioUnitario;
+    }
+
+    public sealed record ProductoItem(int IdProducto, string Nombre, decimal Precio, int Stock);
+}

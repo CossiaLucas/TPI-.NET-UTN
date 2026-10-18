@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 namespace TPI.ApiClients
 {
     public class BaseApiClient
@@ -29,8 +30,20 @@ namespace TPI.ApiClients
                 Sesion.CerrarSesion();
                 throw new SesionExpiradaException();
             }
+            if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                var mensaje = await LeerErrorAsync(response);
+                if (mensaje is not null)
+                    throw new ApiErrorException(mensaje, response.StatusCode);
+            }
             response.EnsureSuccessStatusCode();
+        }
+        private static async Task<string?> LeerErrorAsync(HttpResponseMessage response)
+        {
+            try { return (await response.Content.ReadFromJsonAsync<ErrorResponse>())?.Error; }
+            catch { return null; }
         }
 
     }
+    internal sealed record ErrorResponse(string? Error);
 }

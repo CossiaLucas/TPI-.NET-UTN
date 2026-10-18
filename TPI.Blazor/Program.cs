@@ -21,6 +21,8 @@ var apiBaseUrl = builder.Configuration["ApiBaseUrl"]!;
 builder.Services.AddHttpClient<IAuthService, AuthApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
 builder.Services.AddHttpClient<ICategoriaService, CategoriaApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
 builder.Services.AddHttpClient<IProductoService, ProductoApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
+builder.Services.AddHttpClient<IVentaApiClient, VentaApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
+builder.Services.AddHttpClient<IMetodoPagoService, MetodoPagoApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, BlazorAuthorizationMiddlewareResultHandler>();
 
 var app = builder.Build();

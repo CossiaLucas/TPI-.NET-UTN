@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using TPI.Services.Interfaces;
+﻿using Dominio.Entities;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TPI.ApiClients;
+using TPI.Services.Interfaces;
 
 namespace TPI.WinForms
 {
@@ -30,8 +31,8 @@ namespace TPI.WinForms
             // Si mas adelante seagrega algo para el usuario comun, va aca tambian,
             // condicionado a !_sesionService.Usuario.IsAdmin.
 
-           // menuProductos.Visible = _sesionService.Usuario.IsAdmin; esta linea seria si en un futuro los menus de producto y categorias los ve solo el admin
-           // menuCategorias.Visible = _sesionService.Usuario.IsAdmin;    por ahora para la entrega 2 asumo que no
+            // menuProductos.Visible = _sesionService.Usuario.IsAdmin; esta linea seria si en un futuro los menus de producto y categorias los ve solo el admin
+            // menuCategorias.Visible = _sesionService.Usuario.IsAdmin;    por ahora para la entrega 2 asumo que no
         }
 
         private void menuProductos_Click(object sender, EventArgs e)
@@ -45,6 +46,12 @@ namespace TPI.WinForms
             var form = Program.ServiceProvider.GetRequiredService<CategoriaListForm>();
             form.ShowDialog();
             //MessageBox.Show("Categorías menu ejemplo");
+        }
+
+        private void menuVentas_Click(object sender, EventArgs e)
+        {
+            var form = Program.ServiceProvider.GetRequiredService<Ventas>();
+            form.ShowDialog();
         }
 
         public bool SalirDeLaApp { get; private set; } = true; // default: si cierran con la X, se sale

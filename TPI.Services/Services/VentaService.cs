@@ -68,10 +68,10 @@ namespace TPI.Services.Services
             return await _ventaRepository.DeleteAsync(nroVenta);
         }
 
-        public async Task<IEnumerable<VentaDTO>> GetAllAsync()
+        public async Task<IEnumerable<VentaDTO>> GetAllAsync(string? estado = null)
         {
             var ventas = await _ventaRepository.GetAllAsync();
-            return ventas.Select(ToDto).ToList();
+            return FiltrarPorEstado(ventas, estado).Select(ToDto).ToList();
         }
 
         public async Task<VentaDTO?> GetByNroVentaAsync(int nroVenta)
@@ -80,10 +80,10 @@ namespace TPI.Services.Services
             return venta is null ? null : ToDto(venta);
         }
 
-        public async Task<IEnumerable<VentaDTO>> GetByUsuarioAsync(int idUsuario)
+        public async Task<IEnumerable<VentaDTO>> GetByUsuarioAsync(int idUsuario, string? estado = null)
         {
             var ventas = await _ventaRepository.GetAllAsync();
-            return ventas.Where(v => v.IdUsuario == idUsuario).Select(ToDto).ToList();
+            return FiltrarPorEstado(ventas.Where(v => v.IdUsuario == idUsuario), estado).Select(ToDto).ToList();
         }
 
         public async Task<bool> UpdateAsync(VentaUpdateDTO dto)
@@ -130,6 +130,19 @@ namespace TPI.Services.Services
         }
 
         //-------------------------------------------------
+
+        private static IEnumerable<Venta> FiltrarPorEstado(IEnumerable<Venta> ventas, string? estado)
+        {
+            if (string.IsNullOrWhiteSpace(estado)) return ventas;
+
+            if (!EstadoVenta.EsValido(estado))
+                throw new ArgumentException(
+                    $"Estado inválido. Valores permitidos: {string.Join(", ", EstadoVenta.Todos)}.");
+
+            return ventas.Where(v => v.Estado == estado);
+        }
+        
+       
 
         private async Task ReemplazarLineasAsync(Venta venta, Dictionary<int, int> actuales, Dictionary<int, int> nuevas)
         {

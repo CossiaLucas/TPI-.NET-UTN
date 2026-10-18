@@ -1,8 +1,9 @@
+using Dominio.Entities;
 using Dominio.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TPI.Services.Interfaces;
 using TPI.ApiClients;
+using TPI.Services.Interfaces;
 namespace TPI.WinForms
 {
     internal static class Program
@@ -30,6 +31,8 @@ namespace TPI.WinForms
             services.AddHttpClient<IUsuarioService, UsuarioApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
             services.AddHttpClient<ICategoriaService, CategoriaApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
             services.AddHttpClient<IProductoService, ProductoApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
+            services.AddHttpClient<IVentaApiClient, VentaApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
+            services.AddHttpClient<IMetodoPagoService, MetodoPagoApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
             services.AddSingleton<ISessionService, SesionActual>();
 
             services.AddTransient<LoginForm>();
@@ -38,6 +41,8 @@ namespace TPI.WinForms
             services.AddTransient<CategoriaDetalleForm>();
             services.AddTransient<ProductoListForm>();
             services.AddTransient<ProductoDetalleForm>();
+            services.AddTransient<Ventas>();
+            services.AddTransient<VentaDetalleForm>();
             ServiceProvider = services.BuildServiceProvider();
             var sesion = ServiceProvider.GetRequiredService<ISessionService>();
 

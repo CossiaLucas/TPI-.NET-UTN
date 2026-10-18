@@ -6,8 +6,8 @@ namespace TPI.Services.Interfaces
     {
         Task<VentaDTO> CreateAsync(int idUsuario, VentaCreateDTO dto);
         Task<VentaDTO?> GetByNroVentaAsync(int nroVenta);
-        Task<IEnumerable<VentaDTO>> GetByUsuarioAsync(int idUsuario);
-        Task<IEnumerable<VentaDTO>> GetAllAsync();
+        Task<IEnumerable<VentaDTO>> GetByUsuarioAsync(int idUsuario, string? estado = null);
+        Task<IEnumerable<VentaDTO>> GetAllAsync(string? estado = null);
         Task<bool> UpdateAsync(VentaUpdateDTO dto);
         Task<bool> DeleteAsync(int nroVenta);
     }

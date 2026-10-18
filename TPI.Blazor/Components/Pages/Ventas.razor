@@ -1,0 +1,133 @@
+﻿@page "/ventas"
+@attribute [Authorize]
+@inject IVentaApiClient VentaClient
+@inject ISessionService Sesion
+@inject IJSRuntime JS
+
+<h3>Ventas</h3>
+
+<a class="btn btn-primary mb-3" href="/ventas/nueva">Nueva venta</a>
+
+<AuthorizeView Roles="Admin">
+    <div class="row g-2 align-items-end mb-3">
+        <div class="col-auto">
+            <label class="form-label">Estado</label>
+            <select class="form-select" @bind="_estadoFiltro">
+                <option value="">Todos</option>
+                @foreach (var estado in EstadoVenta.Todos)
+                {
+                    <option value="@estado">@estado</option>
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="button" class="btn btn-outline-primary" @onclick="Cargar">Buscar</button>
+            <button type="button" class="btn btn-link" @onclick="Limpiar">Limpiar</button>
+        </div>
+    </div>
+</AuthorizeView>
+
+@if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (_ventas is null)
+{
+    <p>Cargando...</p>
+}
+else if (_ventas.Count == 0)
+{
+    <p>No hay ventas para mostrar.</p>
+}
+else
+{
+    <p class="text-muted">@_ventas.Count venta(s)</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>N°</th>
+                <th>Comprador</th>
+                <th>Método de pago</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var v in _ventas)
+            {
+                <tr>
+                    <td>@v.NroVenta</td>
+                    <td>@v.NombreUsuario</td>
+                    <td>@v.NombreMetodoPago</td>
+                    <td>@v.Total.ToString("C2")</td>
+                    <td><span class="badge @ClaseEstado(v.Estado)">@v.Estado</span></td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-secondary" href="/ventas/@v.NroVenta">
+                            @(EsAdmin ? "Editar" : "Ver detalle")
+                        </a>
+                        <AuthorizeView Roles="Admin">
+                            <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(v)">Eliminar</button>
+                        </AuthorizeView>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<VentaDTO>? _ventas;
+    private string _estadoFiltro = string.Empty;
+    private string? _error;
+
+    private bool EsAdmin => Sesion.Usuario?.IsAdmin == true;
+
+    protected override async Task OnInitializedAsync() => await Cargar();
+
+    private async Task Cargar()
+    {
+        try
+        {
+            var estado = EsAdmin && !string.IsNullOrEmpty(_estadoFiltro) ? _estadoFiltro : null;
+            _ventas = (await VentaClient.GetAllAsync(estado))
+                .OrderByDescending(v => v.NroVenta)
+                .ToList();
+            _error = null;
+        }
+        catch (SesionExpiradaException) { }
+        catch (HttpRequestException ex)
+        {
+            _error = $"No se pudieron cargar las ventas: {ex.Message}";
+            _ventas ??= new();
+        }
+    }
+
+    private async Task Limpiar()
+    {
+        _estadoFiltro = string.Empty;
+        await Cargar();
+    }
+
+    private async Task Eliminar(VentaDTO v)
+    {
+        var aviso = v.Estado == EstadoVenta.Cancelado ? "" : " Se devolverá el stock de sus productos.";
+        if (!await JS.InvokeAsync<bool>("confirm", $"¿Eliminar la venta N° {v.NroVenta}?{aviso}")) return;
+
+        try
+        {
+            await VentaClient.DeleteAsync(v.NroVenta);
+            await Cargar();
+        }
+        catch (SesionExpiradaException) { }
+        catch (HttpRequestException ex) { _error = $"No se pudo eliminar: {ex.Message}"; }
+    }
+
+    private static string ClaseEstado(string estado) => estado switch
+    {
+        EstadoVenta.Pagado => "bg-success",
+        EstadoVenta.Cancelado => "bg-secondary",
+        _ => "bg-warning text-dark"
+    };
+}
