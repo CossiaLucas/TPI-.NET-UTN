@@ -12,6 +12,7 @@
         private TextBox txtEmail;
         private TextBox txtPassword;
         private Button btnLogin;
+        private Button btnRegistro;
 
         /// <summary>
         /// Limpiar los recursos que se estén utilizando.
@@ -39,6 +40,7 @@
             txtEmail = new TextBox();
             txtPassword = new TextBox();
             btnLogin = new Button();
+            btnRegistro = new Button();
 
             SuspendLayout();
 
@@ -90,12 +92,21 @@
             btnLogin.UseVisualStyleBackColor = true;
             btnLogin.Click += btnLogin_Click;
 
+            btnRegistro.Location = new Point(50, 245);
+            btnRegistro.Name = "btnRegistro";
+            btnRegistro.Size = new Size(300, 35);
+            btnRegistro.TabIndex = 5;
+            btnRegistro.Text = "Crear una cuenta";
+            btnRegistro.UseVisualStyleBackColor = true;
+            btnRegistro.Click += btnRegistro_Click;
+
             // 
             // LoginForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(400, 300);
+            ClientSize = new Size(400, 330);
+            Controls.Add(btnRegistro);
             Controls.Add(btnLogin);
             Controls.Add(txtPassword);
             Controls.Add(lblPassword);

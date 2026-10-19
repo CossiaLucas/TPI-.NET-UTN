@@ -1,0 +1,43 @@
+@page "/registro"
+@inject IUsuarioService UsuarioService
+@inject NavigationManager Nav
+
+<h3>Crear cuenta</h3>
+
+<EditForm Model="_model" OnValidSubmit="Registrar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="row">
+        <div class="col-md-6 mb-3"><label class="form-label">Nombre</label><InputText class="form-control" @bind-Value="_model.Nombre" /><ValidationMessage For="() => _model.Nombre" /></div>
+        <div class="col-md-6 mb-3"><label class="form-label">Apellido</label><InputText class="form-control" @bind-Value="_model.Apellido" /><ValidationMessage For="() => _model.Apellido" /></div>
+        <div class="col-md-6 mb-3"><label class="form-label">Usuario</label><InputText class="form-control" @bind-Value="_model.Username" /><ValidationMessage For="() => _model.Username" /></div>
+        <div class="col-md-6 mb-3"><label class="form-label">Email</label><InputText class="form-control" @bind-Value="_model.Email" /><ValidationMessage For="() => _model.Email" /></div>
+        <div class="col-md-6 mb-3"><label class="form-label">Contraseña</label><InputText type="password" class="form-control" @bind-Value="_model.Clave" /><ValidationMessage For="() => _model.Clave" /></div>
+        <div class="col-md-6 mb-3"><label class="form-label">DNI</label><InputText class="form-control" @bind-Value="_model.DNI" /><ValidationMessage For="() => _model.DNI" /></div>
+        <div class="col-md-6 mb-3"><label class="form-label">Fecha de nacimiento</label><InputDate class="form-control" @bind-Value="_model.FechaNacimiento" /><ValidationMessage For="() => _model.FechaNacimiento" /></div>
+        <div class="col-md-6 mb-3"><label class="form-label">Teléfono</label><InputText class="form-control" @bind-Value="_model.Telefono" /><ValidationMessage For="() => _model.Telefono" /></div>
+    </div>
+    @if (_error is not null) { <div class="alert alert-danger">@_error</div> }
+    <button type="submit" class="btn btn-primary" disabled="@_enviando">Registrarme</button>
+    <a class="btn btn-link" href="/login">Volver al login</a>
+</EditForm>
+
+@code {
+    private readonly UsuarioCreateDTO _model = new() { FechaNacimiento = DateTime.Today.AddYears(-18) };
+    private string? _error;
+    private bool _enviando;
+
+    private async Task Registrar()
+    {
+        _enviando = true;
+        _error = null;
+        try
+        {
+            await UsuarioService.CreateAsync(_model);
+            Nav.NavigateTo("/login?registrado=1");
+        }
+        catch (ApiErrorException ex) { _error = ex.Message; }
+        catch (HttpRequestException) { _error = "No se pudo conectar con el servidor."; }
+        finally { _enviando = false; }
+    }
+}

@@ -41,5 +41,12 @@ namespace TPI.WinForms
                     "Error de conexion", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private void btnRegistro_Click(object sender, EventArgs e)
+        {
+            using var form = new RegistroForm(
+                Program.ServiceProvider.GetRequiredService<IUsuarioService>());
+            form.ShowDialog(this);
+        }
     }
 }
