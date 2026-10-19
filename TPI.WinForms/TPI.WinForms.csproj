@@ -12,13 +12,12 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.11" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\ClassLibrary1\TPI.ApiClients.csproj" />
-    <ProjectReference Include="..\Dominio\Dominio.csproj" />
-    <ProjectReference Include="..\TPI.ApiClients\TPI.ApiClients.csproj" />
-    <ProjectReference Include="..\TPI.Api\TPI.Api.csproj" />
-    <ProjectReference Include="..\TPI.Services\TPI.Services.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Dominio\Dominio.csproj" />
+		<ProjectReference Include="..\TPI.ApiClients\TPI.ApiClients.csproj" />
+		<ProjectReference Include="..\TPI.Api\TPI.Api.csproj" />
+		<ProjectReference Include="..\TPI.Services\TPI.Services.csproj" />
+	</ItemGroup>
 
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
