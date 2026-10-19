@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
 using TPI.Api;
+using TPI.Data.ADO;
 using TPI.Data.Context;
 using TPI.Data.Repositories;
 using TPI.Services.Interfaces;
@@ -62,6 +63,11 @@ builder.Services.AddScoped<IMetodoDePagoRepository, MetodoDePagoRepository>();
 builder.Services.AddScoped<IMetodoPagoService, MetodoPagoService>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Reportes: acceso a datos con ADO.NET (usa la misma cadena de conexión que EF)
+builder.Services.AddScoped<IReporteRepository>(_ =>
+    new ReporteRepository(builder.Configuration.GetConnectionString("DefaultConnection")!));
+builder.Services.AddScoped<IReporteService, ReporteService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -135,6 +141,9 @@ using (var scope = app.Services.CreateScope())
         new MetodoPago { Nombre = "Transferencia" });
         await context.SaveChangesAsync();
     }
+
+    // Datos de demostración para los reportes (solo si la base no tiene ventas)
+    await DemoDataSeeder.SeedAsync(context);
 }
 
 
@@ -161,6 +170,8 @@ app.MapVentaEndpoints();
 
 
 app.MapMetodoPagoEndpoints();
+
+app.MapReporteEndpoints();
 
 app.MapControllers();
 

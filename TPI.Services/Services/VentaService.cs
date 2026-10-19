@@ -38,6 +38,7 @@ namespace TPI.Services.Services
 
             var venta = new Venta
             {
+                Fecha = DateTime.Now,
                 IdUsuario = idUsuario,
                 IdMetodoPago = dto.IdMetodoPago,
                 Estado = EstadoVenta.NoPagado
@@ -141,8 +142,8 @@ namespace TPI.Services.Services
 
             return ventas.Where(v => v.Estado == estado);
         }
-        
-       
+
+
 
         private async Task ReemplazarLineasAsync(Venta venta, Dictionary<int, int> actuales, Dictionary<int, int> nuevas)
         {
@@ -249,6 +250,7 @@ namespace TPI.Services.Services
             return new VentaDTO
             {
                 NroVenta = venta.NroVenta,
+                Fecha = venta.Fecha,
                 IdUsuario = venta.IdUsuario,
                 NombreUsuario = venta.Usuario is null
                     ? string.Empty

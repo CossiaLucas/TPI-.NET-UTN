@@ -26,9 +26,7 @@ namespace TPI.Data.Context
         {
             base.OnModelCreating(modelBuilder);
 
-            // ==========================================
             // Direccion
-            // ==========================================
             modelBuilder.Entity<Direccion>(entity =>
             {
                 entity.ToTable("direccion");
@@ -59,9 +57,7 @@ namespace TPI.Data.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // ==========================================
             // Usuario
-            // ==========================================
             modelBuilder.Entity<Usuario>(entity =>
             {
                 entity.ToTable("usuario");
@@ -124,9 +120,7 @@ namespace TPI.Data.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // ==========================================
             // Categoria
-            // ==========================================
             modelBuilder.Entity<Categoria>(entity =>
             {
                 entity.ToTable("categoria");
@@ -141,9 +135,7 @@ namespace TPI.Data.Context
                     .IsUnique();
             });
 
-            // ==========================================
             // Producto
-            // ==========================================
             modelBuilder.Entity<Producto>(entity =>
             {
                 entity.ToTable("producto");
@@ -169,9 +161,7 @@ namespace TPI.Data.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // ==========================================
             // Precio
-            // ==========================================
             modelBuilder.Entity<Precio>(entity =>
             {
                 entity.ToTable("precio");
@@ -195,9 +185,8 @@ namespace TPI.Data.Context
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // ==========================================
+
             // Carrito
-            // ==========================================
             modelBuilder.Entity<Carrito>(entity =>
             {
                 entity.ToTable("carrito");
@@ -216,9 +205,7 @@ namespace TPI.Data.Context
                     .HasColumnType("decimal(10,2)");
             });
 
-            // ==========================================
             // ItemCarrito
-            // ==========================================
             modelBuilder.Entity<ItemCarrito>(entity =>
             {
                 entity.ToTable("itemCarrito");
@@ -249,9 +236,7 @@ namespace TPI.Data.Context
                 .IsUnique();
             });
 
-            // ==========================================
             // Favorito
-            // ==========================================
             modelBuilder.Entity<Favorito>(entity =>
             {
                 entity.ToTable("favoritos");
@@ -277,9 +262,7 @@ namespace TPI.Data.Context
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // ==========================================
             // MetodoPago
-            // ==========================================
             modelBuilder.Entity<MetodoPago>(entity =>
             {
                 entity.ToTable("metodoPago");
@@ -294,14 +277,16 @@ namespace TPI.Data.Context
                     .IsUnique();
             });
 
-            // ==========================================
             // Venta
-            // ==========================================
             modelBuilder.Entity<Venta>(entity =>
             {
                 entity.ToTable("venta");
 
                 entity.HasKey(e => e.NroVenta);
+
+                entity.Property(e => e.Fecha)
+                    .HasColumnType("datetime")
+                    .IsRequired();
 
                 entity.Property(e => e.Total)
                     .HasColumnType("decimal(10,2)");
@@ -321,9 +306,7 @@ namespace TPI.Data.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // ==========================================
             // DetalleVenta
-            // ==========================================
             modelBuilder.Entity<DetalleVenta>(entity =>
             {
                 entity.ToTable("detalleVenta");

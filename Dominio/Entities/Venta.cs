@@ -8,8 +8,8 @@ namespace Dominio.Entities
 {
     public class Venta
     {
-        public int IdVenta { get; set; }
         public int NroVenta { get; set; }
+        public DateTime Fecha { get; set; } = DateTime.Now;
         public int IdUsuario { get; set; }
         public Usuario Usuario { get; set; }
         public int IdMetodoPago { get; set; }
