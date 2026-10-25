@@ -74,7 +74,7 @@ namespace TPI.Api
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest)
-            .RequireAuthorization();
+            .RequireAuthorization("SoloAdmin");
 
             app.MapDelete("/ventas/{nroVenta:int}", async (int nroVenta, IVentaService service) =>
             {
@@ -84,7 +84,7 @@ namespace TPI.Api
             .WithName("DeleteVenta")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
-            .RequireAuthorization();
+            .RequireAuthorization("SoloAdmin");
 
 
         }
