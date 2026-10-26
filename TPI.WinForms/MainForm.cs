@@ -26,9 +26,25 @@ namespace TPI.WinForms
         private void MainForm_Load(object sender, EventArgs e)
         {
             lblBienvenida.Text = $"Hola, {_sesionService.Usuario!.Nombre}";
+            foreach (var item in menuStrip.Items.Find("menuReportes", false))
+                item.Visible = _sesionService.Usuario!.IsAdmin;
 
-            // Los reportes son solo para administradores (la API lo vuelve a exigir con la política SoloAdmin).
-            menuReportes.Visible = _sesionService.Usuario?.IsAdmin == true;
+            // Menús de administración: solo se agregan si el usuario logueado es admin.
+            // (La API también lo exige con la policy SoloAdmin: ocultar el menú es solo comodidad.)
+            if (_sesionService.Usuario.IsAdmin)
+            {
+                var menuUsuarios = new ToolStripMenuItem("Usuarios");
+                menuUsuarios.Click += (_, _) =>
+                    Program.ServiceProvider.GetRequiredService<UsuarioListForm>().ShowDialog();
+
+                var menuMetodosPago = new ToolStripMenuItem("Métodos de pago");
+                menuMetodosPago.Click += (_, _) =>
+                    Program.ServiceProvider.GetRequiredService<MetodoPagoListForm>().ShowDialog();
+
+                var posicion = menuStrip.Items.IndexOf(menuLogout);
+                menuStrip.Items.Insert(posicion, menuUsuarios);
+                menuStrip.Items.Insert(posicion + 1, menuMetodosPago);
+            }
 
             // Los CRUD de Producto/Categoria solo los veria un admin.
             // Si mas adelante seagrega algo para el usuario comun, va aca tambian,
@@ -51,15 +67,15 @@ namespace TPI.WinForms
             //MessageBox.Show("Categorías menu ejemplo");
         }
 
-        private void menuVentas_Click(object sender, EventArgs e)
+        private void menuReportes_Click(object sender, EventArgs e)
         {
-            var form = Program.ServiceProvider.GetRequiredService<Ventas>();
+            var form = Program.ServiceProvider.GetRequiredService<ReportesGraficosForm>();
             form.ShowDialog();
         }
 
-        private void menuReportes_Click(object sender, EventArgs e)
+        private void menuVentas_Click(object sender, EventArgs e)
         {
-            var form = Program.ServiceProvider.GetRequiredService<ReportesForm>();
+            var form = Program.ServiceProvider.GetRequiredService<Ventas>();
             form.ShowDialog();
         }
 

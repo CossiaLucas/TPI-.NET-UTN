@@ -1,251 +1,177 @@
-@page "/reportes"
+﻿@page "/reportes"
 @attribute [Authorize(Roles = "Admin")]
-@using System.Globalization
 @inject IReporteService ReporteService
-@inject ICategoriaService CategoriaService
 
 <h3>Reportes</h3>
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item"><button class="nav-link @(_tab == 0 ? "active" : "")" @onclick="() => _tab = 0">Ventas por mes</button></li>
+    <li class="nav-item"><button class="nav-link @(_tab == 1 ? "active" : "")" @onclick="() => _tab = 1">Productos más vendidos</button></li>
+    <li class="nav-item"><button class="nav-link @(_tab == 2 ? "active" : "")" @onclick="() => _tab = 2">Stock bajo</button></li>
+</ul>
 
 @if (_error is not null)
 {
     <div class="alert alert-danger">@_error</div>
 }
 
-@* ---------------------------------------------------------------- Ventas por mes (con gráfico) *@
-<div class="card mb-4">
-    <div class="card-header"><strong>Ventas por mes</strong> y productos más vendidos</div>
-    <div class="card-body">
-        <div class="row g-2 align-items-end mb-3">
-            <div class="col-auto">
-                <label class="form-label mb-0">Desde</label>
-                <input type="date" class="form-control" @bind="_desde" />
-            </div>
-            <div class="col-auto">
-                <label class="form-label mb-0">Hasta</label>
-                <input type="date" class="form-control" @bind="_hasta" />
-            </div>
-            <div class="col-auto">
-                <label class="form-label mb-0">Estado</label>
-                <select class="form-select" @bind="_estado">
-                    <option value="">(Sin canceladas)</option>
-                    @foreach (var e in EstadoVenta.Todos)
-                    {
-                        <option value="@e">@e</option>
-                    }
-                </select>
-            </div>
-            <div class="col-auto">
-                <label class="form-label mb-0">Categoría (ranking)</label>
-                <select class="form-select" @bind="_idCategoria">
-                    <option value="0">(Todas)</option>
-                    @foreach (var c in _categorias)
-                    {
-                        <option value="@c.Id">@c.Nombre</option>
-                    }
-                </select>
-            </div>
-            <div class="col-auto">
-                <label class="form-label mb-0">Top (ranking)</label>
-                <input type="number" class="form-control" style="width:90px" min="1" max="100" @bind="_top" />
-            </div>
-            <div class="col-auto">
-                <button class="btn btn-primary" @onclick="ConsultarVentasAsync" disabled="@_cargando">Consultar</button>
-            </div>
+@if (_tab == 0)
+{
+    <div class="row g-2 align-items-end mb-3">
+        <div class="col-auto"><label class="form-label">Desde</label><input type="date" class="form-control" @bind="_vmDesde" @bind:format="yyyy-MM-dd" /></div>
+        <div class="col-auto"><label class="form-label">Hasta</label><input type="date" class="form-control" @bind="_vmHasta" @bind:format="yyyy-MM-dd" /></div>
+        <div class="col-auto">
+            <label class="form-label">Estado</label>
+            <select class="form-select" @bind="_vmEstado">
+                <option value="">Sin canceladas</option>
+                @foreach (var estado in EstadoVenta.Todos) { <option value="@estado">@estado</option> }
+            </select>
         </div>
-
-        @if (_ventas is not null)
-        {
-            <h6>Total vendido por mes ($)</h6>
-            <div class="d-flex align-items-end border-start border-bottom px-2" style="height:260px; gap:6px;">
-                @foreach (var v in _ventas)
-                {
-                    var pct = _maximo > 0 ? (double)(v.Total / _maximo) * 85 : 0;
-                    var altura = pct.ToString("0.##", CultureInfo.InvariantCulture);
-                    var minimo = v.Total > 0 ? "2px" : "0";
-                    var tooltip = $"{v.Etiqueta}: {v.Total.ToString("C2", Cultura)} ({v.CantidadVentas} ventas)";
-                    <div class="flex-fill d-flex flex-column justify-content-end align-items-center"
-                         style="height:100%; min-width:0;" title="@tooltip">
-                        <small class="text-muted" style="font-size:.65rem">@(v.Total > 0 ? v.Total.ToString("N0", Cultura) : "")</small>
-                        <div class="bg-primary w-100" style="height:@(altura)%; min-height:@minimo"></div>
-                    </div>
-                }
-            </div>
-            <div class="d-flex px-2 mb-3" style="gap:6px;">
-                @foreach (var v in _ventas)
-                {
-                    <small class="flex-fill text-center" style="font-size:.65rem; min-width:0">@v.Etiqueta</small>
-                }
-            </div>
-
-            <p class="mb-2"><strong>Total del período:</strong> @_ventas.Sum(v => v.Total).ToString("C2", Cultura)
-                &nbsp;|&nbsp; <strong>Ventas:</strong> @_ventas.Sum(v => v.CantidadVentas)</p>
-            <table class="table table-sm">
-                <thead><tr><th>Mes</th><th>Ventas</th><th class="text-end">Total</th></tr></thead>
-                <tbody>
-                    @foreach (var v in _ventas)
-                    {
-                        <tr><td>@v.Etiqueta</td><td>@v.CantidadVentas</td><td class="text-end">@v.Total.ToString("C2", Cultura)</td></tr>
-                    }
-                </tbody>
-            </table>
-        }
-
-        @if (_ranking is not null)
-        {
-            <h6 class="mt-4">Productos más vendidos</h6>
-            <table class="table table-sm">
-                <thead><tr><th>Producto</th><th>Categoría</th><th>Unidades</th><th style="width:30%"></th><th class="text-end">Monto</th></tr></thead>
-                <tbody>
-                    @foreach (var p in _ranking)
-                    {
-                        var pctU = _maxUnidades > 0 ? (double)p.UnidadesVendidas / _maxUnidades * 100 : 0;
-                        var anchoU = pctU.ToString("0.##", CultureInfo.InvariantCulture);
-                        <tr>
-                            <td>@p.Nombre</td>
-                            <td>@p.Categoria</td>
-                            <td>@p.UnidadesVendidas</td>
-                            <td>
-                                <div class="progress" style="height:10px">
-                                    <div class="progress-bar" style="width:@(anchoU)%"></div>
-                                </div>
-                            </td>
-                            <td class="text-end">@p.MontoTotal.ToString("C2", Cultura)</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
+        <div class="col-auto"><button type="button" class="btn btn-primary" @onclick="GenerarVentasPorMes" disabled="@_cargando">Generar</button></div>
     </div>
-</div>
 
-@* ---------------------------------------------------------------- Stock bajo *@
-<div class="card mb-4">
-    <div class="card-header"><strong>Productos con stock bajo</strong></div>
-    <div class="card-body">
-        <div class="row g-2 align-items-end mb-3">
-            <div class="col-auto">
-                <label class="form-label mb-0">Stock menor o igual a</label>
-                <input type="number" class="form-control" style="width:120px" min="0" @bind="_umbral" />
-            </div>
-            <div class="col-auto">
-                <label class="form-label mb-0">Categoría</label>
-                <select class="form-select" @bind="_idCategoriaStock">
-                    <option value="0">(Todas)</option>
-                    @foreach (var c in _categorias)
-                    {
-                        <option value="@c.Id">@c.Nombre</option>
-                    }
-                </select>
-            </div>
-            <div class="col-auto">
-                <button class="btn btn-primary" @onclick="ConsultarStockAsync" disabled="@_cargando">Consultar</button>
-            </div>
+    @if (_ventasPorMes is not null)
+    {
+        <p class="fw-bold">@_ventasPorMes.Sum(v => v.CantidadVentas) ventas | Total: @_ventasPorMes.Sum(v => v.Total).ToString("C2")</p>
+        <GraficoBarras Titulo="Ventas por mes (importe total)"
+                       Datos="@(_ventasPorMes.Select(v => new PuntoGrafico(v.Etiqueta, v.Total)).ToList())"
+                       Formato="@(v => v.ToString("C0"))" />
+        <table class="table table-sm">
+            <thead><tr><th>Período</th><th>Cantidad de ventas</th><th>Total</th></tr></thead>
+            <tbody>
+                @foreach (var v in _ventasPorMes)
+                {
+                    <tr><td>@v.Etiqueta</td><td>@v.CantidadVentas</td><td>@v.Total.ToString("C2")</td></tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+else if (_tab == 1)
+{
+    <div class="row g-2 align-items-end mb-3">
+        <div class="col-auto"><label class="form-label">Desde</label><input type="date" class="form-control" @bind="_mvDesde" @bind:format="yyyy-MM-dd" /></div>
+        <div class="col-auto"><label class="form-label">Hasta</label><input type="date" class="form-control" @bind="_mvHasta" @bind:format="yyyy-MM-dd" /></div>
+        <div class="col-auto">
+            <label class="form-label">Estado</label>
+            <select class="form-select" @bind="_mvEstado">
+                <option value="">Sin canceladas</option>
+                @foreach (var estado in EstadoVenta.Todos) { <option value="@estado">@estado</option> }
+            </select>
         </div>
-
-        @if (_stock is not null)
-        {
-            <table class="table table-sm">
-                <thead><tr><th>Producto</th><th>Categoría</th><th class="text-end">Stock</th></tr></thead>
-                <tbody>
-                    @foreach (var p in _stock)
-                    {
-                        <tr><td>@p.Nombre</td><td>@p.Categoria</td><td class="text-end">@p.Stock</td></tr>
-                    }
-                    @if (_stock.Count == 0)
-                    {
-                        <tr><td colspan="3" class="text-muted">No hay productos con ese nivel de stock.</td></tr>
-                    }
-                </tbody>
-            </table>
-        }
+        <div class="col-auto"><label class="form-label">Top</label><input type="number" min="1" max="100" class="form-control" style="width: 90px" @bind="_mvTop" /></div>
+        <div class="col-auto"><button type="button" class="btn btn-primary" @onclick="GenerarMasVendidos" disabled="@_cargando">Generar</button></div>
     </div>
-</div>
+
+    @if (_masVendidos is not null)
+    {
+        <p class="fw-bold">@_masVendidos.Sum(p => p.UnidadesVendidas) unidades | Monto: @_masVendidos.Sum(p => p.MontoTotal).ToString("C2")</p>
+        <GraficoBarras Titulo="@($"Top {_mvTopGenerado} de productos más vendidos (unidades)")"
+                       Datos="@(_masVendidos.Select(p => new PuntoGrafico(p.Nombre, p.UnidadesVendidas)).ToList())"
+                       Formato="@(v => v.ToString("N0"))" />
+        <table class="table table-sm">
+            <thead><tr><th>Producto</th><th>Categoría</th><th>Unidades vendidas</th><th>Monto total</th></tr></thead>
+            <tbody>
+                @foreach (var p in _masVendidos)
+                {
+                    <tr><td>@p.Nombre</td><td>@p.Categoria</td><td>@p.UnidadesVendidas</td><td>@p.MontoTotal.ToString("C2")</td></tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+else
+{
+    <div class="row g-2 align-items-end mb-3">
+        <div class="col-auto"><label class="form-label">Stock menor o igual a</label><input type="number" min="0" class="form-control" style="width: 110px" @bind="_sbUmbral" /></div>
+        <div class="col-auto"><button type="button" class="btn btn-primary" @onclick="GenerarStockBajo" disabled="@_cargando">Generar</button></div>
+    </div>
+
+    @if (_stockBajo is not null)
+    {
+        <p class="fw-bold">@_stockBajo.Count productos con stock menor o igual a @_sbUmbralGenerado</p>
+        <table class="table table-sm">
+            <thead><tr><th>Producto</th><th>Categoría</th><th>Stock</th></tr></thead>
+            <tbody>
+                @foreach (var p in _stockBajo)
+                {
+                    <tr><td>@p.Nombre</td><td>@p.Categoria</td><td>@p.Stock</td></tr>
+                }
+            </tbody>
+        </table>
+    }
+}
 
 @code {
-    private static readonly CultureInfo Cultura = new("es-AR");
-
-    private List<CategoriaDTO> _categorias = new();
-    private List<VentasPorMesDTO>? _ventas;
-    private List<ProductoMasVendidoDTO>? _ranking;
-    private List<ProductoStockBajoDTO>? _stock;
-
-    private DateTime _desde = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-11);
-    private DateTime _hasta = DateTime.Today;
-    private string _estado = string.Empty;
-    private int _idCategoria;
-    private int _top = 10;
-    private int _umbral = 5;
-    private int _idCategoriaStock;
-
-    private decimal _maximo;
-    private int _maxUnidades;
+    private int _tab;
     private bool _cargando;
     private string? _error;
 
+    // Ventas por mes (por defecto: los últimos 12 meses completos, igual que la API)
+    private DateTime _vmDesde = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-11);
+    private DateTime _vmHasta = DateTime.Today;
+    private string _vmEstado = string.Empty;
+    private List<VentasPorMesDTO>? _ventasPorMes;
+
+    // Productos más vendidos
+    private DateTime _mvDesde = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-11);
+    private DateTime _mvHasta = DateTime.Today;
+    private string _mvEstado = string.Empty;
+    private int _mvTop = 10;
+    private int _mvTopGenerado = 10;
+    private List<ProductoMasVendidoDTO>? _masVendidos;
+
+    // Stock bajo
+    private int _sbUmbral = 5;
+    private int _sbUmbralGenerado = 5;
+    private List<ProductoStockBajoDTO>? _stockBajo;
+
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            _categorias = (await CategoriaService.GetAllAsync()).OrderBy(c => c.Nombre).ToList();
-        }
-        catch (SesionExpiradaException) { return; /* Routes redirige al login */ }
-        catch (HttpRequestException ex) { _error = ex.Message; }
-
-        await ConsultarVentasAsync();
-        await ConsultarStockAsync();
+        await GenerarVentasPorMes();
+        if (_error is null) await GenerarMasVendidos();
+        if (_error is null) await GenerarStockBajo();
     }
 
-    private async Task ConsultarVentasAsync()
+    private static string? Estado(string valor) => string.IsNullOrWhiteSpace(valor) ? null : valor;
+
+    private async Task GenerarVentasPorMes()
     {
-        _error = null;
-
-        // Validación a nivel UI (la API valida de nuevo en el dominio).
-        if (_desde.Date > _hasta.Date)
-        {
-            _error = "La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.";
-            return;
-        }
-        if (_top < 1 || _top > 100)
-        {
-            _error = "El 'Top' debe estar entre 1 y 100.";
-            return;
-        }
-
-        _cargando = true;
-        try
-        {
-            var estado = string.IsNullOrEmpty(_estado) ? null : _estado;
-            int? categoria = _idCategoria > 0 ? _idCategoria : null;
-
-            _ventas = (await ReporteService.VentasPorMesAsync(_desde.Date, _hasta.Date, estado)).ToList();
-            _maximo = _ventas.Count == 0 ? 0 : _ventas.Max(v => v.Total);
-
-            _ranking = (await ReporteService.ProductosMasVendidosAsync(
-                _desde.Date, _hasta.Date, estado, categoria, _top)).ToList();
-            _maxUnidades = _ranking.Count == 0 ? 0 : _ranking.Max(p => p.UnidadesVendidas);
-        }
-        catch (SesionExpiradaException) { /* Routes redirige al login */ }
-        catch (HttpRequestException ex) { _error = ex.Message; }
-        finally { _cargando = false; }
+        if (_vmDesde.Date > _vmHasta.Date) { _error = "La fecha 'Desde' no puede ser posterior a 'Hasta'."; return; }
+        await Ejecutar(async () =>
+            _ventasPorMes = (await ReporteService.VentasPorMesAsync(_vmDesde.Date, _vmHasta.Date, Estado(_vmEstado))).ToList());
     }
 
-    private async Task ConsultarStockAsync()
+    private async Task GenerarMasVendidos()
     {
-        _error = null;
-        if (_umbral < 0)
+        if (_mvDesde.Date > _mvHasta.Date) { _error = "La fecha 'Desde' no puede ser posterior a 'Hasta'."; return; }
+        if (_mvTop < 1 || _mvTop > 100) { _error = "El 'top' debe estar entre 1 y 100."; return; }
+        await Ejecutar(async () =>
         {
-            _error = "El umbral de stock no puede ser negativo.";
-            return;
-        }
+            _masVendidos = (await ReporteService.ProductosMasVendidosAsync(
+                _mvDesde.Date, _mvHasta.Date, Estado(_mvEstado), null, _mvTop)).ToList();
+            _mvTopGenerado = _mvTop;
+        });
+    }
 
-        _cargando = true;
-        try
+    private async Task GenerarStockBajo()
+    {
+        if (_sbUmbral < 0) { _error = "El umbral de stock no puede ser negativo."; return; }
+        await Ejecutar(async () =>
         {
-            int? categoria = _idCategoriaStock > 0 ? _idCategoriaStock : null;
-            _stock = (await ReporteService.ProductosStockBajoAsync(_umbral, categoria)).ToList();
-        }
-        catch (SesionExpiradaException) { /* Routes redirige al login */ }
-        catch (HttpRequestException ex) { _error = ex.Message; }
+            _stockBajo = (await ReporteService.ProductosStockBajoAsync(_sbUmbral, null)).ToList();
+            _sbUmbralGenerado = _sbUmbral;
+        });
+    }
+
+    private async Task Ejecutar(Func<Task> generar)
+    {
+        _cargando = true;
+        _error = null;
+        try { await generar(); }
+        catch (SesionExpiradaException) { /* el estado de auth cambió: Routes redirige al login */ }
+        catch (ApiErrorException ex) { _error = ex.Message; }
+        catch (HttpRequestException) { _error = "No se pudo generar el reporte."; }
         finally { _cargando = false; }
     }
 }

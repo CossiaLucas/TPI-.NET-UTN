@@ -1,9 +1,4 @@
 ﻿using Dominio.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dominio.Interfaces
 {
@@ -11,6 +6,8 @@ namespace Dominio.Interfaces
     {
         Task<IEnumerable<MetodoPago>> GetAllAsync();
         Task<MetodoPago?> GetByIdAsync(int id);
-
+        Task AddAsync(MetodoPago metodoPago);
+        Task<bool> UpdateAsync(MetodoPago metodoPago);
+        Task<bool> DeleteAsync(int id);
     }
 }

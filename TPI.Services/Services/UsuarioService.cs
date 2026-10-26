@@ -60,9 +60,16 @@ namespace TPI.Services.Services
             if (usuario is null)
                 return false;
 
-            usuario.Nombre = dto.Nombre;
-            usuario.Apellido = dto.Apellido;
-            usuario.Telefono = dto.Telefono;
+            if (string.IsNullOrWhiteSpace(dto.Nombre))
+                throw new ArgumentException("El nombre es obligatorio.");
+            if (string.IsNullOrWhiteSpace(dto.Apellido))
+                throw new ArgumentException("El apellido es obligatorio.");
+            if (string.IsNullOrWhiteSpace(dto.Telefono))
+                throw new ArgumentException("El teléfono es obligatorio.");
+
+            usuario.Nombre = dto.Nombre.Trim();
+            usuario.Apellido = dto.Apellido.Trim();
+            usuario.Telefono = dto.Telefono.Trim();
 
             if (!string.IsNullOrWhiteSpace(dto.Clave))
                 usuario.SetPassword(dto.Clave); // reusa la validación + regenera salt/hash

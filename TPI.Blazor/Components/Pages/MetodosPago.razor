@@ -1,0 +1,73 @@
+﻿@page "/metodos-pago"
+@attribute [Authorize(Roles = "Admin")]
+@inject IMetodoPagoService MetodoPagoService
+@inject IJSRuntime JS
+
+<h3>Métodos de pago</h3>
+<a class="btn btn-primary mb-3" href="/metodos-pago/nuevo">Nuevo</a>
+
+@if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (_metodos is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr><th>ID</th><th>Nombre</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var m in _metodos)
+            {
+                <tr>
+                    <td>@m.IdMetodoPago</td>
+                    <td>@m.Nombre</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-secondary" href="/metodos-pago/@m.IdMetodoPago">Editar</a>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(m)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<MetodoPagoDTO>? _metodos;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync() => await Cargar();
+
+    private async Task Cargar()
+    {
+        try { _metodos = await MetodoPagoService.GetAllAsync(); }
+        catch (SesionExpiradaException) { /* el estado de auth cambió: Routes redirige al login */ }
+        catch (HttpRequestException) { _error = "No se pudieron cargar los métodos de pago."; _metodos = new(); }
+    }
+
+    private async Task Eliminar(MetodoPagoDTO m)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", $"¿Eliminar el método de pago '{m.Nombre}'?")) return;
+
+        try
+        {
+            await MetodoPagoService.DeleteAsync(m.IdMetodoPago);
+            _error = null;
+            await Cargar();
+        }
+        catch (SesionExpiradaException) { }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
+        {
+            _error = "No se puede eliminar: el método de pago tiene ventas asociadas.";
+        }
+        catch (HttpRequestException)
+        {
+            _error = "No se pudo eliminar el método de pago.";
+        }
+    }
+}

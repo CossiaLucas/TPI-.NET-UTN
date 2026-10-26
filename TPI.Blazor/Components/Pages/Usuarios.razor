@@ -1,0 +1,86 @@
+﻿@page "/usuarios"
+@attribute [Authorize(Roles = "Admin")]
+@inject IUsuarioService UsuarioService
+@inject ISessionService Sesion
+@inject IJSRuntime JS
+
+<h3>Usuarios</h3>
+<a class="btn btn-primary mb-3" href="/usuarios/nuevo">Nuevo</a>
+
+@if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (_usuarios is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th><th>Nombre</th><th>Apellido</th><th>Usuario</th><th>Email</th><th>DNI</th><th>Teléfono</th><th>Rol</th><th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in _usuarios)
+            {
+                <tr>
+                    <td>@u.Id</td>
+                    <td>@u.Nombre</td>
+                    <td>@u.Apellido</td>
+                    <td>@u.Username</td>
+                    <td>@u.Email</td>
+                    <td>@u.DNI</td>
+                    <td>@u.Telefono</td>
+                    <td>@(u.IsAdmin ? "Admin" : "Cliente")</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-secondary" href="/usuarios/@u.Id">Editar</a>
+                        @if (u.Id != Sesion.Usuario?.Id)
+                        {
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(u)">Eliminar</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<UsuarioDTO>? _usuarios;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync() => await Cargar();
+
+    private async Task Cargar()
+    {
+        try { _usuarios = (await UsuarioService.GetAllAsync()).OrderBy(u => u.Id).ToList(); }
+        catch (SesionExpiradaException) { /* el estado de auth cambió: Routes redirige al login */ }
+        catch (HttpRequestException) { _error = "No se pudieron cargar los usuarios."; _usuarios = new(); }
+    }
+
+    private async Task Eliminar(UsuarioDTO u)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", $"¿Eliminar al usuario '{u.Username}'?")) return;
+
+        try
+        {
+            await UsuarioService.DeleteAsync(u.Id);
+            _error = null;
+            await Cargar();
+        }
+        catch (SesionExpiradaException) { }
+        catch (ApiErrorException ex) { _error = ex.Message; }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
+        {
+            _error = "No se puede eliminar: el usuario tiene ventas asociadas.";
+        }
+        catch (HttpRequestException)
+        {
+            _error = "No se pudo eliminar el usuario.";
+        }
+    }
+}

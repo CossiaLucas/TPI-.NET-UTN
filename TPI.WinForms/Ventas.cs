@@ -19,6 +19,11 @@ namespace TPI.WinForms
         private readonly IVentaApiClient _ventaClient;
         private readonly ISessionService _sesion;
 
+        // Filtros de búsqueda (se agregan a la barra de herramientas existente)
+        private List<VentaDTO> _todas = new();
+        private readonly ToolStripComboBox _cmbEstado = new();
+        private readonly ToolStripTextBox _txtBuscar = new();
+
         private bool EsAdmin => _sesion.Usuario?.IsAdmin == true;
 
         public Ventas(IVentaApiClient ventaClient, ISessionService sesion)
@@ -34,7 +39,37 @@ namespace TPI.WinForms
             tsbEditar.ToolTipText = EsAdmin ? "Editar" : "Ver detalle";
 
             ConfigurarGrilla();
+            ConfigurarFiltros();
             await ListarAsync();
+        }
+
+        private void ConfigurarFiltros()
+        {
+            _cmbEstado.DropDownStyle = ComboBoxStyle.DropDownList;
+            _cmbEstado.AutoSize = false;
+            _cmbEstado.Width = 110;
+            _cmbEstado.Items.Add("(Todos)");
+            foreach (var estado in EstadoVenta.Todos)
+                _cmbEstado.Items.Add(estado);
+            _cmbEstado.SelectedIndex = 0;
+
+            tsCategorias.Items.Add(new ToolStripSeparator());
+            tsCategorias.Items.Add(new ToolStripLabel("Estado:"));
+            tsCategorias.Items.Add(_cmbEstado);
+
+            // El estado se filtra en la API (GET /ventas?estado=...); se engancha después de fijar el valor inicial.
+            _cmbEstado.SelectedIndexChanged += async (_, _) => await ListarAsync();
+
+            // El administrador ve las ventas de todos: puede buscar por comprador o por N° de venta.
+            if (EsAdmin)
+            {
+                _txtBuscar.AutoSize = false;
+                _txtBuscar.Width = 150;
+                _txtBuscar.ToolTipText = "Buscar por comprador o N° de venta";
+                tsCategorias.Items.Add(new ToolStripLabel("Buscar:"));
+                tsCategorias.Items.Add(_txtBuscar);
+                _txtBuscar.TextChanged += (_, _) => AplicarFiltroTexto();
+            }
         }
 
         private void ConfigurarGrilla()
@@ -67,14 +102,28 @@ namespace TPI.WinForms
         {
             try
             {
-                var ventas = await _ventaClient.GetAllAsync();
-                dgvVentas.DataSource = ventas.OrderByDescending(v => v.NroVenta).ToList();
+                var estado = _cmbEstado.SelectedIndex > 0 ? _cmbEstado.SelectedItem as string : null;
+                _todas = await _ventaClient.GetAllAsync(estado);
+                AplicarFiltroTexto();
             }
             catch (SesionExpiradaException) { throw; }
             catch (HttpRequestException ex)
             {
                 MessageBox.Show($"No se pudieron cargar las ventas: {ex.Message}");
             }
+        }
+
+        private void AplicarFiltroTexto()
+        {
+            IEnumerable<VentaDTO> ventas = _todas;
+
+            var texto = _txtBuscar.Text.Trim();
+            if (texto.Length > 0)
+                ventas = ventas.Where(v =>
+                    v.NombreUsuario.Contains(texto, StringComparison.OrdinalIgnoreCase) ||
+                    v.NroVenta.ToString().Contains(texto));
+
+            dgvVentas.DataSource = ventas.OrderByDescending(v => v.NroVenta).ToList();
         }
 
         private async void btnActualizar_Click(object sender, EventArgs e) => await ListarAsync();

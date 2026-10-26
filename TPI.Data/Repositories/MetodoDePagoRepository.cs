@@ -1,11 +1,6 @@
 ﻿using Dominio.Entities;
 using Dominio.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TPI.Data.Context;
 
 namespace TPI.Data.Repositories
@@ -21,5 +16,29 @@ namespace TPI.Data.Repositories
 
         public async Task<MetodoPago?> GetByIdAsync(int id) =>
             await _context.MetodosPago.AsNoTracking().FirstOrDefaultAsync(m => m.IdMetodoPago == id);
+
+        public async Task AddAsync(MetodoPago metodoPago)
+        {
+            _context.MetodosPago.Add(metodoPago);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> UpdateAsync(MetodoPago metodoPago)
+        {
+            _context.MetodosPago.Update(metodoPago);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var entidad = await _context.MetodosPago.FindAsync(id);
+            if (entidad is null)
+                return false;
+
+            _context.MetodosPago.Remove(entidad);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

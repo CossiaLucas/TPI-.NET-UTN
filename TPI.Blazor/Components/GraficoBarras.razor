@@ -1,0 +1,81 @@
+﻿@using System.Globalization
+@using System.Net
+
+@* Gráfico de barras en SVG puro (sin librerías de JavaScript).
+   Los textos del SVG se generan con Texto() porque en Razor la etiqueta <text> está reservada y no admite atributos. *@
+
+<svg viewBox="0 0 @N(AnchoTotal) @N(AltoTotal)" class="w-100" style="max-height: 380px;" role="img" aria-label="@Titulo">
+    @Texto(8, 20, "start", 14, Titulo, negrita: true)
+
+    @if (Datos.Count == 0 || Datos.All(d => d.Valor == 0))
+    {
+        @Texto(AnchoTotal / 2, AltoTotal / 2, "middle", 13, "Sin datos para el período seleccionado", color: "#6c757d")
+    }
+    else
+    {
+        var max = EscalaMaxima(Datos.Max(d => d.Valor));
+        var ranura = AnchoPlot / Datos.Count;
+        var ancho = Math.Min(ranura * 0.65, 60.0);
+        var caracteres = Math.Max(3, (int)(ranura / 6.5));
+
+        @for (var i = 0; i <= 5; i++)
+        {
+            var y = Sup + AltoPlot - AltoPlot * i / 5.0;
+            <line x1="@N(Izq)" x2="@N(AnchoTotal - Der)" y1="@N(y)" y2="@N(y)" stroke="@(i == 0 ? "#888" : "#ddd")" />
+            @Texto(Izq - 6, y + 4, "end", 11, Formato(max * i / 5), color: "#6c757d")
+        }
+
+        @for (var i = 0; i < Datos.Count; i++)
+        {
+            var punto = Datos[i];
+            var alto = (double)(punto.Valor / max) * AltoPlot;
+            var x = Izq + ranura * i + (ranura - ancho) / 2;
+            var centro = Izq + ranura * i + ranura / 2;
+            var etiqueta = punto.Etiqueta.Length > caracteres ? punto.Etiqueta[..(caracteres - 1)] + "…" : punto.Etiqueta;
+
+            <rect x="@N(x)" y="@N(Sup + AltoPlot - alto)" width="@N(ancho)" height="@N(alto)" fill="#4682b4">
+                <title>@punto.Etiqueta: @Formato(punto.Valor)</title>
+            </rect>
+            @Texto(centro, Sup + AltoPlot + 16, "middle", 11, etiqueta)
+
+            @if (ranura >= 60 && punto.Valor > 0)
+            {
+                @Texto(centro, Sup + AltoPlot - alto - 4, "middle", 11, Formato(punto.Valor))
+            }
+        }
+    }
+</svg>
+
+@code {
+    [Parameter] public string Titulo { get; set; } = string.Empty;
+    [Parameter] public List<PuntoGrafico> Datos { get; set; } = new();
+    /// <summary>Cómo se muestran los valores (por ejemplo, v => v.ToString("C0")).</summary>
+    [Parameter] public Func<decimal, string> Formato { get; set; } = v => v.ToString("N0");
+
+    private const double AnchoTotal = 800, AltoTotal = 340, Izq = 85, Der = 15, Sup = 40, Inf = 50;
+    private const double AnchoPlot = AnchoTotal - Izq - Der;
+    private const double AltoPlot = AltoTotal - Sup - Inf;
+
+    // Siempre con punto decimal, sin importar la cultura del servidor (en SVG la coma rompería el atributo).
+    private static string N(double valor) => valor.ToString("0.##", CultureInfo.InvariantCulture);
+
+    // Elemento <text> del SVG. El contenido se codifica para HTML, así que un nombre de producto con "<" o "&" no rompe nada.
+    private static MarkupString Texto(double x, double y, string ancla, int tamanio, string contenido,
+        bool negrita = false, string color = "currentColor")
+    {
+        var peso = negrita ? " font-weight='bold'" : string.Empty;
+        var html = "<text x='" + N(x) + "' y='" + N(y) + "' text-anchor='" + ancla + "' font-size='" + tamanio +
+                   "' fill='" + color + "'" + peso + ">" + WebUtility.HtmlEncode(contenido) + "</text>";
+        return new MarkupString(html);
+    }
+
+    // Redondea el máximo a 1, 2, 5 o 10 x 10^n para que el eje tenga números "lindos".
+    private static decimal EscalaMaxima(decimal max)
+    {
+        if (max <= 0) return 1;
+        var exponente = (decimal)Math.Pow(10, Math.Floor(Math.Log10((double)max)));
+        var f = max / exponente;
+        var bonito = f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10;
+        return bonito * exponente;
+    }
+}

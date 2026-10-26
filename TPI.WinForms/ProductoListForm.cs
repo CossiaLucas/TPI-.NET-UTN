@@ -19,6 +19,12 @@ namespace TPI.WinForms
         private readonly IProductoService _productoService;
         private readonly ISessionService _sessionService;
 
+        // Filtros de búsqueda (se agregan a la barra de herramientas existente)
+        private List<ProductoDTO> _todos = new();
+        private readonly ToolStripTextBox _txtBuscar = new();
+        private readonly ToolStripComboBox _cmbCategoria = new();
+        private bool _actualizandoFiltros;
+
         public ProductoListForm(IProductoService productoService, ISessionService sessionService)
         {
             InitializeComponent();
@@ -33,6 +39,7 @@ namespace TPI.WinForms
             tsbNuevo.Visible = esAdmin;
             tsbEliminar.Visible = esAdmin;
             ConfigurarGrilla();
+            ConfigurarFiltros();
             await ListarAsync();
         }
 
@@ -75,10 +82,73 @@ namespace TPI.WinForms
             });
         }
 
+        private void ConfigurarFiltros()
+        {
+            _txtBuscar.AutoSize = false;
+            _txtBuscar.Width = 160;
+            _txtBuscar.ToolTipText = "Buscar por nombre del producto";
+
+            _cmbCategoria.DropDownStyle = ComboBoxStyle.DropDownList;
+            _cmbCategoria.AutoSize = false;
+            _cmbCategoria.Width = 150;
+
+            var btnLimpiar = new ToolStripButton("Limpiar filtros");
+            btnLimpiar.Click += (_, _) =>
+            {
+                _txtBuscar.Text = string.Empty;
+                if (_cmbCategoria.Items.Count > 0)
+                    _cmbCategoria.SelectedIndex = 0;
+            };
+
+            tsCategorias.Items.Add(new ToolStripSeparator());
+            tsCategorias.Items.Add(new ToolStripLabel("Nombre:"));
+            tsCategorias.Items.Add(_txtBuscar);
+            tsCategorias.Items.Add(new ToolStripLabel("Categoría:"));
+            tsCategorias.Items.Add(_cmbCategoria);
+            tsCategorias.Items.Add(btnLimpiar);
+
+            _txtBuscar.TextChanged += (_, _) => AplicarFiltros();
+            _cmbCategoria.SelectedIndexChanged += (_, _) => AplicarFiltros();
+        }
+
         private async Task ListarAsync()
         {
-            var productos = await _productoService.GetAllAsync();
-            dgvProductos.DataSource = productos;
+            _todos = (await _productoService.GetAllAsync()).ToList();
+            CargarCategoriasDelFiltro();
+            AplicarFiltros();
+        }
+
+        // Las categorías del combo salen de los propios productos cargados.
+        private void CargarCategoriasDelFiltro()
+        {
+            var seleccionada = _cmbCategoria.SelectedItem as string;
+
+            _actualizandoFiltros = true;
+            _cmbCategoria.Items.Clear();
+            _cmbCategoria.Items.Add("(Todas)");
+            foreach (var categoria in _todos.Select(p => p.NombreCategoria).Distinct().OrderBy(c => c))
+                _cmbCategoria.Items.Add(categoria);
+
+            var indice = seleccionada is null ? 0 : _cmbCategoria.Items.IndexOf(seleccionada);
+            _cmbCategoria.SelectedIndex = indice < 0 ? 0 : indice;
+            _actualizandoFiltros = false;
+        }
+
+        private void AplicarFiltros()
+        {
+            if (_actualizandoFiltros)
+                return;
+
+            IEnumerable<ProductoDTO> resultado = _todos;
+
+            var texto = _txtBuscar.Text.Trim();
+            if (texto.Length > 0)
+                resultado = resultado.Where(p => p.Nombre.Contains(texto, StringComparison.OrdinalIgnoreCase));
+
+            if (_cmbCategoria.SelectedIndex > 0 && _cmbCategoria.SelectedItem is string categoria)
+                resultado = resultado.Where(p => p.NombreCategoria == categoria);
+
+            dgvProductos.DataSource = resultado.ToList();
         }
 
         private async void btnActualizar_Click(object sender, EventArgs e)

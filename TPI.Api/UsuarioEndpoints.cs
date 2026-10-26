@@ -1,4 +1,6 @@
-﻿using TPI.Services.DTOs;
+﻿using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using TPI.Services.DTOs;
 using TPI.Services.Interfaces;
 
 namespace TPI.Api
@@ -38,6 +40,11 @@ namespace TPI.Api
                 {
                     return Results.BadRequest(new { error = ex.Message });
                 }
+                catch (DbUpdateException)
+                {
+                    // Índices únicos de usuario / email / DNI
+                    return Results.BadRequest(new { error = "Ya existe un usuario con ese nombre de usuario, email o DNI." });
+                }
             })
             .WithName("AddUsuario")
             .Produces<UsuarioDTO>(StatusCodes.Status201Created)
@@ -63,14 +70,25 @@ namespace TPI.Api
             .RequireAuthorization("SoloAdmin");
 
 
-            app.MapDelete("/usuarios/{id}", async (int id, IUsuarioService usuarioService) =>
+            app.MapDelete("/usuarios/{id}", async (int id, ClaimsPrincipal user, IUsuarioService usuarioService) =>
             {
-                var deleted = await usuarioService.DeleteAsync(id);
-                return deleted ? Results.NoContent() : Results.NotFound();
+                if (user.FindFirstValue(ClaimTypes.NameIdentifier) == id.ToString())
+                    return Results.BadRequest(new { error = "No podés eliminar tu propio usuario." });
+
+                try
+                {
+                    var deleted = await usuarioService.DeleteAsync(id);
+                    return deleted ? Results.NoContent() : Results.NotFound();
+                }
+                catch (DbUpdateException)
+                {
+                    return Results.Conflict(new { error = "No se puede eliminar el usuario porque tiene ventas asociadas." });
+                }
             })
             .WithName("DeleteUsuario")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status409Conflict)
             .RequireAuthorization("SoloAdmin");
             }
     }

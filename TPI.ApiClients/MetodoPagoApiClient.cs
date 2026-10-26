@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Net;
 using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
 using TPI.Services.DTOs;
 using TPI.Services.Interfaces;
 
@@ -19,6 +15,41 @@ namespace TPI.ApiClients
             var response = await HttpClient.GetAsync("/metodos-pago");
             await EnsureSuccessOrThrowAsync(response);
             return await response.Content.ReadFromJsonAsync<List<MetodoPagoDTO>>() ?? new();
+        }
+
+        public async Task<MetodoPagoDTO?> GetByIdAsync(int id)
+        {
+            AgregarToken();
+            var response = await HttpClient.GetAsync($"/metodos-pago/{id}");
+            if (response.StatusCode == HttpStatusCode.NotFound) return null;
+            await EnsureSuccessOrThrowAsync(response);
+            return await response.Content.ReadFromJsonAsync<MetodoPagoDTO>();
+        }
+
+        public async Task<MetodoPagoDTO> CreateAsync(MetodoPagoDTO dto)
+        {
+            AgregarToken();
+            var response = await HttpClient.PostAsJsonAsync("/metodos-pago", dto);
+            await EnsureSuccessOrThrowAsync(response);
+            return (await response.Content.ReadFromJsonAsync<MetodoPagoDTO>())!;
+        }
+
+        public async Task<bool> UpdateAsync(MetodoPagoDTO dto)
+        {
+            AgregarToken();
+            var response = await HttpClient.PutAsJsonAsync("/metodos-pago", dto);
+            if (response.StatusCode == HttpStatusCode.NotFound) return false;
+            await EnsureSuccessOrThrowAsync(response);
+            return true;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            AgregarToken();
+            var response = await HttpClient.DeleteAsync($"/metodos-pago/{id}");
+            if (response.StatusCode == HttpStatusCode.NotFound) return false;
+            await EnsureSuccessOrThrowAsync(response);
+            return true;
         }
     }
 }

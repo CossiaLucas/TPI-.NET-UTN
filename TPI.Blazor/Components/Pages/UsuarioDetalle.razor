@@ -1,0 +1,146 @@
+﻿@page "/usuarios/nuevo"
+@page "/usuarios/{Id:int}"
+@attribute [Authorize(Roles = "Admin")]
+@inject IUsuarioService UsuarioService
+@inject NavigationManager Nav
+
+<h3>@(Id is null ? "Nuevo usuario" : "Editar usuario")</h3>
+
+@if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (_cargando)
+{
+    <p>Cargando...</p>
+}
+else if (Id is null)
+{
+    <p class="text-muted">Los usuarios nuevos se crean con rol Cliente.</p>
+    <EditForm Model="_crear" OnValidSubmit="Crear">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="row">
+            <div class="col-md-6 mb-3"><label class="form-label">Nombre</label><InputText class="form-control" @bind-Value="_crear.Nombre" /><ValidationMessage For="() => _crear.Nombre" /></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Apellido</label><InputText class="form-control" @bind-Value="_crear.Apellido" /><ValidationMessage For="() => _crear.Apellido" /></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Usuario</label><InputText class="form-control" @bind-Value="_crear.Username" /><ValidationMessage For="() => _crear.Username" /></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Email</label><InputText class="form-control" @bind-Value="_crear.Email" /><ValidationMessage For="() => _crear.Email" /></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Contraseña</label><InputText type="password" class="form-control" @bind-Value="_crear.Clave" /><ValidationMessage For="() => _crear.Clave" /></div>
+            <div class="col-md-6 mb-3"><label class="form-label">DNI</label><InputText class="form-control" @bind-Value="_crear.DNI" /><ValidationMessage For="() => _crear.DNI" /></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Fecha de nacimiento</label><InputDate class="form-control" @bind-Value="_crear.FechaNacimiento" /><ValidationMessage For="() => _crear.FechaNacimiento" /></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Teléfono</label><InputText class="form-control" @bind-Value="_crear.Telefono" /><ValidationMessage For="() => _crear.Telefono" /></div>
+        </div>
+        <button type="submit" class="btn btn-primary" disabled="@_guardando">Guardar</button>
+        <a class="btn btn-secondary" href="/usuarios">Cancelar</a>
+    </EditForm>
+}
+else if (_original is not null)
+{
+    <EditForm Model="_editar" OnValidSubmit="Editar">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="row">
+            <div class="col-md-6 mb-3"><label class="form-label">Usuario</label><input class="form-control" value="@_original.Username" disabled /></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Email</label><input class="form-control" value="@_original.Email" disabled /></div>
+            <div class="col-md-6 mb-3"><label class="form-label">DNI</label><input class="form-control" value="@_original.DNI" disabled /></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Rol</label><input class="form-control" value="@(_original.IsAdmin ? "Admin" : "Cliente")" disabled /></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Nombre</label><InputText class="form-control" @bind-Value="_editar.Nombre" /><ValidationMessage For="() => _editar.Nombre" /></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Apellido</label><InputText class="form-control" @bind-Value="_editar.Apellido" /><ValidationMessage For="() => _editar.Apellido" /></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Teléfono</label><InputText class="form-control" @bind-Value="_editar.Telefono" /><ValidationMessage For="() => _editar.Telefono" /></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Nueva contraseña (opcional)</label><InputText type="password" class="form-control" @bind-Value="_editar.Clave" /></div>
+        </div>
+        <button type="submit" class="btn btn-primary" disabled="@_guardando">Guardar</button>
+        <a class="btn btn-secondary" href="/usuarios">Cancelar</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private readonly UsuarioCreateDTO _crear = new() { FechaNacimiento = DateTime.Today.AddYears(-18) };
+    private readonly UsuarioEdicionModel _editar = new();
+    private UsuarioDTO? _original;
+    private bool _cargando = true;
+    private bool _guardando;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (Id is not null)
+            {
+                _original = await UsuarioService.GetByIdAsync(Id.Value);
+                if (_original is null) { Nav.NavigateTo("/usuarios"); return; }
+
+                _editar.Nombre = _original.Nombre;
+                _editar.Apellido = _original.Apellido;
+                _editar.Telefono = _original.Telefono;
+            }
+        }
+        catch (SesionExpiradaException) { return; }
+        catch (HttpRequestException) { _error = "No se pudo cargar el usuario."; }
+
+        _cargando = false;
+    }
+
+    private async Task Crear()
+    {
+        _guardando = true;
+        _error = null;
+        try
+        {
+            await UsuarioService.CreateAsync(_crear);
+            Nav.NavigateTo("/usuarios");
+        }
+        catch (SesionExpiradaException) { }
+        catch (ApiErrorException ex) { _error = ex.Message; }
+        catch (HttpRequestException) { _error = "No se pudo guardar el usuario."; }
+        finally { _guardando = false; }
+    }
+
+    private async Task Editar()
+    {
+        if (!string.IsNullOrEmpty(_editar.Clave) && _editar.Clave.Length < 6)
+        {
+            _error = "La contraseña debe tener al menos 6 caracteres.";
+            return;
+        }
+
+        _guardando = true;
+        _error = null;
+        try
+        {
+            var existe = await UsuarioService.UpdateAsync(new UsuarioUpdateDTO
+            {
+                Id = Id!.Value,
+                Nombre = _editar.Nombre,
+                Apellido = _editar.Apellido,
+                Telefono = _editar.Telefono,
+                Clave = string.IsNullOrWhiteSpace(_editar.Clave) ? null : _editar.Clave
+            });
+
+            if (!existe) { _error = "El usuario ya no existe."; return; }
+            Nav.NavigateTo("/usuarios");
+        }
+        catch (SesionExpiradaException) { }
+        catch (ApiErrorException ex) { _error = ex.Message; }
+        catch (HttpRequestException) { _error = "No se pudo guardar el usuario."; }
+        finally { _guardando = false; }
+    }
+
+    public class UsuarioEdicionModel
+    {
+        [Required(ErrorMessage = "El nombre es obligatorio.")]
+        public string Nombre { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El apellido es obligatorio.")]
+        public string Apellido { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El teléfono es obligatorio.")]
+        public string Telefono { get; set; } = string.Empty;
+
+        public string? Clave { get; set; }
+    }
+}
