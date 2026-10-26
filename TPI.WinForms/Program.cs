@@ -33,6 +33,7 @@ namespace TPI.WinForms
             services.AddHttpClient<IProductoService, ProductoApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
             services.AddHttpClient<IVentaApiClient, VentaApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
             services.AddHttpClient<IMetodoPagoService, MetodoPagoApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
+            services.AddHttpClient<IReporteService, ReporteApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
             services.AddSingleton<ISessionService, SesionActual>();
 
             services.AddTransient<LoginForm>();
@@ -43,6 +44,7 @@ namespace TPI.WinForms
             services.AddTransient<ProductoDetalleForm>();
             services.AddTransient<Ventas>();
             services.AddTransient<VentaDetalleForm>();
+            services.AddTransient<ReportesForm>();
             ServiceProvider = services.BuildServiceProvider();
             var sesion = ServiceProvider.GetRequiredService<ISessionService>();
 

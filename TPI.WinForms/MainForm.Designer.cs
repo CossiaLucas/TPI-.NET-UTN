@@ -41,12 +41,13 @@
             menuLogout = new ToolStripMenuItem();
             lblBienvenida = new Label();
             menuVentas = new ToolStripMenuItem();
+            menuReportes = new ToolStripMenuItem();
             menuStrip.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip
             // 
-            menuStrip.Items.AddRange(new ToolStripItem[] { menuProductos, menuCategorias, menuVentas, menuLogout });
+            menuStrip.Items.AddRange(new ToolStripItem[] { menuProductos, menuCategorias, menuVentas, menuReportes, menuLogout });
             menuStrip.Location = new Point(0, 0);
             menuStrip.Name = "menuStrip";
             menuStrip.Size = new Size(800, 24);
@@ -91,6 +92,13 @@
             menuVentas.Text = "Compras";
             menuVentas.Click += menuVentas_Click;
             // 
+            // menuReportes
+            // 
+            menuReportes.Name = "menuReportes";
+            menuReportes.Size = new Size(65, 20);
+            menuReportes.Text = "Reportes";
+            menuReportes.Click += menuReportes_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -112,6 +120,7 @@
         #endregion
 
         private ToolStripMenuItem menuVentas;
+        private ToolStripMenuItem menuReportes;
     }
 
 

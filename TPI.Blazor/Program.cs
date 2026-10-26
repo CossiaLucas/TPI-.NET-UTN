@@ -24,6 +24,7 @@ builder.Services.AddHttpClient<ICategoriaService, CategoriaApiClient>(c => c.Bas
 builder.Services.AddHttpClient<IProductoService, ProductoApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
 builder.Services.AddHttpClient<IVentaApiClient, VentaApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
 builder.Services.AddHttpClient<IMetodoPagoService, MetodoPagoApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
+builder.Services.AddHttpClient<IReporteService, ReporteApiClient>(c => c.BaseAddress = new Uri(apiBaseUrl));
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, BlazorAuthorizationMiddlewareResultHandler>();
 
 var app = builder.Build();

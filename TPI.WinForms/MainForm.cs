@@ -27,6 +27,9 @@ namespace TPI.WinForms
         {
             lblBienvenida.Text = $"Hola, {_sesionService.Usuario!.Nombre}";
 
+            // Los reportes son solo para administradores (la API lo vuelve a exigir con la política SoloAdmin).
+            menuReportes.Visible = _sesionService.Usuario?.IsAdmin == true;
+
             // Los CRUD de Producto/Categoria solo los veria un admin.
             // Si mas adelante seagrega algo para el usuario comun, va aca tambian,
             // condicionado a !_sesionService.Usuario.IsAdmin.
@@ -51,6 +54,12 @@ namespace TPI.WinForms
         private void menuVentas_Click(object sender, EventArgs e)
         {
             var form = Program.ServiceProvider.GetRequiredService<Ventas>();
+            form.ShowDialog();
+        }
+
+        private void menuReportes_Click(object sender, EventArgs e)
+        {
+            var form = Program.ServiceProvider.GetRequiredService<ReportesForm>();
             form.ShowDialog();
         }
 
